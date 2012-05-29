@@ -196,7 +196,7 @@
 (defvar glsl-deprecated-builtin-list
  '("texture1D" "texture1DProj" "texture1DLod" "texture1DProjLod"
    "texture2D" "texture2DProj" "texture2DLod" "texture2DProjLod"
-   "texture2DRect" 
+   "texture2DRect" "texture2DRectProj" 
    "texture3D" "texture3DProj" "texture3DLod" "texture3DProjLod"
    "shadow1D" "shadow1DProj" "shadow1DLod" "shadow1DProjLod"
    "shadow2D" "shadow2DProj" "shadow2DLod" "shadow2DProjLod"
@@ -260,6 +260,9 @@
   "Major mode for editing OpenGLSL shader files."
   (set (make-local-variable 'font-lock-defaults) '(glsl-font-lock-keywords))
   (set (make-local-variable 'ff-other-file-alist) 'glsl-other-file-alist)
+  (set (make-local-variable 'comment-start) "// ")
+  (set (make-local-variable 'comment-end) "")
+  (set (make-local-variable 'comment-padding) "")
   )
 
 ;;; glsls-mode.el ends here
