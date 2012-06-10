@@ -32,6 +32,7 @@
 ;;  * Updated to GLSL 4.2
 ;;  * Separate deprecated symbols
 ;;  * Made _ part of a word
+;;  * man page lookup at opengl.org
 
 ;; This package provides the following features:
 ;;  * Syntax coloring (via font-lock) for grammar symbols and
