@@ -39,6 +39,8 @@
 ;;  * Indentation for the current line (TAB) and selected region (C-M-\).
 ;;  * Switching between file.vert and file.frag
 ;;    with S-lefttab (via ff-find-other-file)
+;;  * interactive function glsl-find-man-page prompts for glsl built
+;;    in function, formats opengl.org url and passes to w3m
 
 ;;; Installation:
 
@@ -118,6 +120,9 @@
     (define-key glsl-mode-map [S-iso-lefttab] 'ff-find-other-file)    
     glsl-mode-map)
   "Keymap for GLSL major mode")
+
+(defvar glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/manglsl/xhtml/"
+  "Location of GL manpages")
 
 (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
 (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
@@ -256,6 +261,24 @@
     )
   "Alist of extensions to find given the current file's extension")
 
+
+(defun glsl-man-completion-list ()
+  (require 'glsl-mode)
+  (append glsl-builtin-list glsl-deprecated-builtin-list))
+
+(defun glsl-find-man-page (thing)
+  (interactive
+   (let ((word (current-word nil t)))
+     (list 
+      (completing-read
+       (concat "OpenGL.org GLSL man page: (" word "): ")
+       (glsl-man-completion-list)
+       nil nil nil nil word))))
+  (require 'w3m)
+  (save-excursion
+    (w3m-browse-url
+     (concat glsl-man-pages-base-url thing ".xml"))))
+
 (define-derived-mode glsl-mode c-mode "GLSL"
   "Major mode for editing OpenGLSL shader files."
   (set (make-local-variable 'font-lock-defaults) '(glsl-font-lock-keywords))
@@ -264,5 +287,8 @@
   (set (make-local-variable 'comment-end) "")
   (set (make-local-variable 'comment-padding) "")
   )
+
+;(easy-menu-define c-glsl-menu glsl-mode-map "GLSL Mode Commands"
+;		  (cons "GLSL" (c-lang-const c-mode-menu glsl)))
 
 ;;; glsls-mode.el ends here
