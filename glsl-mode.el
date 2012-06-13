@@ -264,7 +264,6 @@
 
 
 (defun glsl-man-completion-list ()
-  (require 'glsl-mode)
   (append glsl-builtin-list glsl-deprecated-builtin-list))
 
 (defun glsl-find-man-page (thing)
