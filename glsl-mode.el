@@ -286,6 +286,7 @@
   (set (make-local-variable 'comment-start) "// ")
   (set (make-local-variable 'comment-end) "")
   (set (make-local-variable 'comment-padding) "")
+  (add-to-list 'align-c++-modes 'glsl-mode)
   )
 
 ;(easy-menu-define c-glsl-menu glsl-mode-map "GLSL Mode Commands"
