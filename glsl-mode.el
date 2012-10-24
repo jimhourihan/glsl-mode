@@ -63,6 +63,8 @@
   (require 'cc-mode)
   (require 'find-file))
 
+(require 'align)
+
 (defgroup glsl nil
   "OpenGL Shading Language Major Mode"
   :group 'glsl
