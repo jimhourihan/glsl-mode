@@ -160,7 +160,7 @@
     "sampler3DRect"))
 
 (defvar glsl-modifier-list
-  '("attribute" "const" "uniform" "varying" "coherent" "volatile" "restrict" 
+  '("attribute" "const" "uniform" "varying" "buffer" "shared" "coherent" "volatile" "restrict"
     "readonly" "writeonly" "atomic_uint" "layout" "centroid" "flat" "smooth"
     "noperspective" "patch" "sample" "break" "continue" "do" "for" "while"
     "switch" "case" "default" "if" "else" "subroutine" "in" "out" "inout"
@@ -168,7 +168,8 @@
     "struct" "common" "partition" "active" "asm" "class" "union" "enum"
     "typedef" "template" "this" "packed" "resource" "goto" "inline" "noinline"
     "public" "static" "extern" "external" "interface" "superp" "input" "output"
-    "filter" "sizeof" "cast" "namespace" "using" "row_major"))
+    "filter" "sizeof" "cast" "namespace" "using" "row_major"
+    "early_fragment_tests"))
 
 (defvar glsl-deprecated-modifier-list
   '("varying" "attribute")) ; centroid is deprecated when used with varying
@@ -184,7 +185,7 @@
     "frexp" "fwidth" "greaterThan" "greaterThanEqual" "imageAtomicAdd"
     "imageAtomicAnd" "imageAtomicCompSwap" "imageAtomicExchange"
     "imageAtomicMax" "imageAtomicMin" "imageAtomicOr" "imageAtomicXor"
-    "imageLoad" "imageStore" "imulExtended" "intBitsToFloat"
+    "imageLoad" "imageSize", "imageStore" "imulExtended" "intBitsToFloat"
     "interpolateAtCentroid" "interpolateAtOffset" "interpolateAtSample"
     "inverse" "inversesqrt" "isinf" "isnan" "ldexp" "length" "lessThan"
     "lessThanEqual" "log" "log2" "matrixCompMult" "max" "memoryBarrier" "min"
@@ -196,7 +197,7 @@
     "textureGatherOffset" "textureGatherOffsets" "textureGrad"
     "textureGradOffset" "textureLod" "textureLodOffset" "textureOffset"
     "textureProj" "textureProjGrad" "textureProjGradOffset" "textureProjLod"
-    "textureProjLodOffset" "textureProjOffset" "textureQueryLod"
+    "textureProjLodOffset" "textureProjOffset" "textureQueryLevels" "textureQueryLod"
     "textureSize" "transpose" "trunc" "uaddCarry" "uintBitsToFloat"
     "umulExtended" "unpackDouble2x32" "unpackHalf2x16" "unpackSnorm2x16"
     "unpackSnorm4x8" "unpackUnorm2x16" "unpackUnorm4x8" "usubBorrow"))
