@@ -231,7 +231,7 @@
 (defvar glsl-font-lock-keywords-1
   (eval-when-compile
     (list
-     (cons (format "^\\W*#\\W*\\<\\(%s\\)\\>" 
+     (cons (format "^[ \t]*#[ \t]*\\<\\(%s\\)\\>" 
                    (regexp-opt glsl-preprocessor-directive-list)) 
            glsl-preprocessor-face) 
      (cons (glsl-ppre glsl-type-list) glsl-type-face) 
