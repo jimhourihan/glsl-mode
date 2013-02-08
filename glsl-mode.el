@@ -185,7 +185,7 @@
     "frexp" "fwidth" "greaterThan" "greaterThanEqual" "imageAtomicAdd"
     "imageAtomicAnd" "imageAtomicCompSwap" "imageAtomicExchange"
     "imageAtomicMax" "imageAtomicMin" "imageAtomicOr" "imageAtomicXor"
-    "imageLoad" "imageSize", "imageStore" "imulExtended" "intBitsToFloat"
+    "imageLoad" "imageSize" "imageStore" "imulExtended" "intBitsToFloat"
     "interpolateAtCentroid" "interpolateAtOffset" "interpolateAtSample"
     "inverse" "inversesqrt" "isinf" "isnan" "ldexp" "length" "lessThan"
     "lessThanEqual" "log" "log2" "matrixCompMult" "max" "memoryBarrier" "min"
