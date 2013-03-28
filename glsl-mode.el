@@ -295,4 +295,4 @@
 ;(easy-menu-define c-glsl-menu glsl-mode-map "GLSL Mode Commands"
 ;		  (cons "GLSL" (c-lang-const c-mode-menu glsl)))
 
-;;; glsls-mode.el ends here
+;;; glsl-mode.el ends here
