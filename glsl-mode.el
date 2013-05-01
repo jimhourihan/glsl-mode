@@ -4,7 +4,7 @@
 ;; Copyright (C) 2011 Jim Hourihan
 ;;
 ;; Authors: Xavier.Decoret@imag.fr, 
-;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.2, etc)
+;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.3, etc)
 ;; Keywords: languages
 ;; Version: 2.0
 ;; X-URL: http://artis.inrialpes.fr/~Xavier.Decoret/resources/glsl-mode/
@@ -29,14 +29,14 @@
 ;;    replaced with keyword lists for easier maintenance
 ;;  * Added customization group and faces
 ;;  * Preprocessor faces
-;;  * Updated to GLSL 4.2
+;;  * Updated to GLSL 4.3
 ;;  * Separate deprecated symbols
 ;;  * Made _ part of a word
 ;;  * man page lookup at opengl.org
 
 ;; This package provides the following features:
 ;;  * Syntax coloring (via font-lock) for grammar symbols and
-;;    builtin functions and variables for up to GLSL version 4.2
+;;    builtin functions and variables for up to GLSL version 4.3
 ;;  * Indentation for the current line (TAB) and selected region (C-M-\).
 ;;  * Switching between file.vert and file.frag
 ;;    with S-lefttab (via ff-find-other-file)
@@ -67,14 +67,13 @@
 
 (defgroup glsl nil
   "OpenGL Shading Language Major Mode"
-  :group 'glsl
   :group 'languages)
 
-(defconst glsl-language-version "4.2"
+(defconst glsl-language-version "4.3"
   "GLSL language version number.")
 
-(defconst glsl-version "2.0"
-  "OpenGLSL major mode version number.")
+(defconst gl-version "4.3"
+  "OpenGL major mode version number.")
 
 (defvar glsl-type-face 'glsl-type-face)
 (defface glsl-type-face
@@ -124,8 +123,9 @@
     glsl-mode-map)
   "Keymap for GLSL major mode")
 
-(defvar glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/manglsl/xhtml/"
-  "Location of GL manpages")
+(defcustom glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/man/xhtml/"
+  "Location of GL man pages"
+  :group 'glsl)
 
 (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
 (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
