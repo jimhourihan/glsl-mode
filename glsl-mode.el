@@ -127,10 +127,12 @@
   "Location of GL man pages"
   :group 'glsl)
 
-(add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
-(add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
-(add-to-list 'auto-mode-alist '("\\.geom\\'" . glsl-mode))
-(add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode))
+;;;###autoload
+(progn
+  (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\\.geom\\'" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode)))
 
 (eval-and-compile
   ;;
@@ -305,6 +307,7 @@
     (w3m-browse-url
      (concat glsl-man-pages-base-url thing ".xml"))))
 
+;;;###autoload
 (define-derived-mode glsl-mode c-mode "GLSL"
   "Major mode for editing OpenGLSL shader files."
   (set (make-local-variable 'font-lock-defaults) '(glsl-font-lock-keywords))
