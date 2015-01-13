@@ -307,7 +307,7 @@
        (glsl-man-completion-list)
        nil nil nil nil word))))
   (save-excursion
-    (w3m-browse-url
+    (browse-url
      (concat glsl-man-pages-base-url thing ".xml"))))
 
 ;;;###autoload
