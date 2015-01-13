@@ -123,7 +123,7 @@
     glsl-mode-map)
   "Keymap for GLSL major mode")
 
-(defcustom glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/man/xhtml/"
+(defcustom glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/man/html/"
   "Location of GL man pages"
   :group 'glsl)
 
@@ -308,7 +308,7 @@
        nil nil nil nil word))))
   (save-excursion
     (browse-url
-     (concat glsl-man-pages-base-url thing ".xml"))))
+     (concat glsl-man-pages-base-url thing ".xtml"))))
 
 ;;;###autoload
 (define-derived-mode glsl-mode c-mode "GLSL"
