@@ -308,7 +308,7 @@
        nil nil nil nil word))))
   (save-excursion
     (browse-url
-     (concat glsl-man-pages-base-url thing ".xtml"))))
+     (concat glsl-man-pages-base-url thing ".xhtml"))))
 
 ;;;###autoload
 (define-derived-mode glsl-mode c-mode "GLSL"
