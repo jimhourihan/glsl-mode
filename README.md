@@ -10,5 +10,7 @@ This package provides the following features:
 - Switching between file.vert and file.frag with S-lefttab (via ff-find-other-file)
 - interactive function glsl-find-man-page prompts for glsl built in function, formats opengl.org url and passes to browse-url
 
-The [GLSL 4.6 Spec (PDF)](https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf)
-was used 
+Original GLSL mode website: (http://artis.inrialpes.fr/~Xavier.Decoret/resources/glsl-mode)
+
+See [GLSL 4.6 Spec (PDF)](https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf)
+the official reference document for GLSL 4.6.
