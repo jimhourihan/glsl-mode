@@ -1,12 +1,12 @@
 ;;; glsl-mode.el --- major mode for Open GLSL shader files
 
 ;; Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
-;; Copyright (C) 2011, 2014 Jim Hourihan
+;; Copyright (C) 2011, 2014, 2019 Jim Hourihan
 ;;
-;; Authors: Xavier.Decoret@imag.fr, 
-;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.5, etc)
-;; Keywords: languages
-;; Version: 2.0
+;; Authors: Xavier.Decoret@imag.fr,
+;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.6, etc)
+;; Keywords: languages OpenGL GPU SPIR-V Vulkan
+;; Version: 2.1
 ;; X-URL: http://artis.inrialpes.fr/~Xavier.Decoret/resources/glsl-mode/
 ;;
 ;; This software is distributed in the hope that it will be useful, but
@@ -29,19 +29,19 @@
 ;;    replaced with keyword lists for easier maintenance
 ;;  * Added customization group and faces
 ;;  * Preprocessor faces
-;;  * Updated to GLSL 4.5
+;;  * Updated to GLSL 4.6
 ;;  * Separate deprecated symbols
 ;;  * Made _ part of a word
 ;;  * man page lookup at opengl.org
 
 ;; This package provides the following features:
 ;;  * Syntax coloring (via font-lock) for grammar symbols and
-;;    builtin functions and variables for up to GLSL version 4.5
+;;    builtin functions and variables for up to GLSL version 4.6
 ;;  * Indentation for the current line (TAB) and selected region (C-M-\).
 ;;  * Switching between file.vert and file.frag
 ;;    with S-lefttab (via ff-find-other-file)
 ;;  * interactive function glsl-find-man-page prompts for glsl built
-;;    in function, formats opengl.org url and passes to w3m
+;;    in function, formats opengl.org url and passes to browse-url
 
 ;;; Installation:
 
@@ -54,6 +54,9 @@
 ;;   (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
 ;;   (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
 ;;   (add-to-list 'auto-mode-alist '("\\.geom\\'" . glsl-mode))
+
+;; Reference:
+;; https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
 
 ;;; Code:
 
@@ -69,10 +72,10 @@
   "OpenGL Shading Language Major Mode"
   :group 'languages)
 
-(defconst glsl-language-version "4.5"
+(defconst glsl-language-version "4.6"
   "GLSL language version number.")
 
-(defconst gl-version "4.5"
+(defconst gl-version "4.6"
   "OpenGL major mode version number.")
 
 (defvar glsl-type-face 'glsl-type-face)
@@ -119,12 +122,13 @@
 
 (defvar glsl-mode-map
   (let ((glsl-mode-map (make-sparse-keymap)))
-    (define-key glsl-mode-map [S-iso-lefttab] 'ff-find-other-file)    
+    (define-key glsl-mode-map [S-iso-lefttab] 'ff-find-other-file)
     glsl-mode-map)
-  "Keymap for GLSL major mode")
+  "Keymap for GLSL major mode.")
 
 (defcustom glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/man/html/"
-  "Location of GL man pages"
+  "Location of GL man pages."
+  :type 'string
   :group 'glsl)
 
 ;;;###autoload
@@ -135,12 +139,9 @@
   (add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode)))
 
 (eval-and-compile
-  ;;
-  ;;    These vars are useful for completion so keep them around after
-  ;;    compile as well. The goal here is to have the byte compiled code
-  ;;    have optimized regexps so its not done at eval time.
-  ;;
-
+  ;; These vars are useful for completion so keep them around after
+  ;; compile as well. The goal here is to have the byte compiled code
+  ;; have optimized regexps so its not done at eval time.
   (defvar glsl-type-list
     '("float" "double" "int" "void" "bool" "true" "false" "mat2" "mat3"
       "mat4" "dmat2" "dmat3" "dmat4" "mat2x2" "mat2x3" "mat2x4" "dmat2x2"
@@ -184,24 +185,31 @@
     '("varying" "attribute")) ; centroid is deprecated when used with varying
 
   (defvar glsl-builtin-list
-    '("abs" "acos" "acosh" "all" "any" "asin" "asinh" "atan" "atanh"
+    '("abs" "acos" "acosh" "all" "any" "anyInvocation" "allInvocations"
+      "allInvocationsEqual" "asin" "asinh" "atan" "atanh"
+      "atomicAdd" "atomicMin" "atomicMax" "atomicAnd" "atomicOr"
+      "atomicXor" "atomicExchange" "atomicCompSwap"
       "atomicCounter" "atomicCounterDecrement" "atomicCounterIncrement"
+      "atomicCounterAdd" "atomicCounterSubtract" "atomicCounterMin"
+      "atomicCounterMax" "atomicCounterAnd" "atomicCounterOr"
+      "atomicCounterXor" "atomicCounterExchange" "atomicCounterCompSwap"
       "barrier" "bitCount" "bitfieldExtract" "bitfieldInsert" "bitfieldReverse"
       "ceil" "clamp" "cos" "cosh" "cross" "degrees" "determinant" "dFdx" "dFdy"
-      "dFdyFine" "dFdxFine" "dFdyCoarse" "dFdxCourse" 
+      "dFdyFine" "dFdxFine" "dFdyCoarse" "dFdxCourse" "distance" "dot"
       "fwidthFine" "fwidthCoarse"
-      "distance" "dot" "EmitStreamVertex" "EmitVertex" "EndPrimitive"
+      "EmitStreamVertex" "EmitStreamPrimitive" "EmitVertex" "EndPrimitive"
       "EndStreamPrimitive" "equal" "exp" "exp2" "faceforward" "findLSB"
       "findMSB" "floatBitsToInt" "floatBitsToUint" "floor" "fma" "fract"
-      "frexp" "fwidth" "greaterThan" "greaterThanEqual" "imageAtomicAdd"
-      "imageAtomicAnd" "imageAtomicCompSwap" "imageAtomicExchange"
+      "frexp" "fwidth" "greaterThan" "greaterThanEqual" "groupMemoryBarrier"
+      "imageAtomicAdd" "imageAtomicAnd" "imageAtomicCompSwap" "imageAtomicExchange"
       "imageAtomicMax" "imageAtomicMin" "imageAtomicOr" "imageAtomicXor"
       "imageLoad" "imageSize" "imageStore" "imulExtended" "intBitsToFloat"
-      "imageSamples"
-      "interpolateAtCentroid" "interpolateAtOffset" "interpolateAtSample"
+      "imageSamples" "interpolateAtCentroid" "interpolateAtOffset" "interpolateAtSample"
       "inverse" "inversesqrt" "isinf" "isnan" "ldexp" "length" "lessThan"
-      "lessThanEqual" "log" "log2" "matrixCompMult" "max" "memoryBarrier" "min"
-      "mix" "mod" "modf" "noise" "normalize" "not" "notEqual" "outerProduct"
+      "lessThanEqual" "log" "log2" "matrixCompMult" "max" "memoryBarrier"
+      "memoryBarrierAtomicCounter" "memoryBarrierBuffer"
+      "memoryBarrierShared" "memoryBarrierImage" "memoryBarrier"
+      "min" "mix" "mod" "modf" "normalize" "not" "notEqual" "outerProduct"
       "packDouble2x32" "packHalf2x16" "packSnorm2x16" "packSnorm4x8"
       "packUnorm2x16" "packUnorm4x8" "pow" "radians" "reflect" "refract"
       "round" "roundEven" "sign" "sin" "sinh" "smoothstep" "sqrt" "step" "tan"
@@ -215,9 +223,10 @@
       "unpackSnorm4x8" "unpackUnorm2x16" "unpackUnorm4x8" "usubBorrow"))
 
   (defvar glsl-deprecated-builtin-list
-    '("texture1D" "texture1DProj" "texture1DLod" "texture1DProjLod"
+    '("noise1" "noise2" "noise3" "noise4"
+      "texture1D" "texture1DProj" "texture1DLod" "texture1DProjLod"
       "texture2D" "texture2DProj" "texture2DLod" "texture2DProjLod"
-      "texture2DRect" "texture2DRectProj" 
+      "texture2DRect" "texture2DRectProj"
       "texture3D" "texture3DProj" "texture3DLod" "texture3DProjLod"
       "shadow1D" "shadow1DProj" "shadow1DLod" "shadow1DProjLod"
       "shadow2D" "shadow2DProj" "shadow2DLod" "shadow2DProjLod"
@@ -246,13 +255,13 @@
 
 (defvar glsl-font-lock-keywords-1
   (list
-   (cons (eval-when-compile 
-           (format "^[ \t]*#[ \t]*\\<\\(%s\\)\\>" 
+   (cons (eval-when-compile
+           (format "^[ \t]*#[ \t]*\\<\\(%s\\)\\>"
                    (regexp-opt glsl-preprocessor-directive-list)))
-         glsl-preprocessor-face) 
+         glsl-preprocessor-face)
    (cons (eval-when-compile
            (glsl-ppre glsl-type-list))
-         glsl-type-face) 
+         glsl-type-face)
    (cons (eval-when-compile
            (glsl-ppre glsl-deprecated-modifier-list))
          glsl-deprecated-keyword-face)
@@ -273,11 +282,11 @@
          glsl-deprecated-variable-name-face)
    (cons "gl_[A-Z][A-Za-z_]+" glsl-variable-name-face)
    )
-  "Minimal highlighting expressions for GLSL mode")
+  "Minimal highlighting expressions for GLSL mode.")
 
 
 (defvar glsl-font-lock-keywords glsl-font-lock-keywords-1
-  "Default highlighting expressions for GLSL mode")
+  "Default highlighting expressions for GLSL mode.")
 
 (defvar glsl-mode-syntax-table
   (let ((glsl-mode-syntax-table (make-syntax-table)))
@@ -286,22 +295,24 @@
     (modify-syntax-entry ?\n "> b" glsl-mode-syntax-table)
     (modify-syntax-entry ?_ "w" glsl-mode-syntax-table)
     glsl-mode-syntax-table)
-  "Syntax table for glsl-mode")
+  "Syntax table for glsl-mode.")
 
 (defvar glsl-other-file-alist
   '(("\\.frag$" (".vert"))
     ("\\.vert$" (".frag"))
     )
-  "Alist of extensions to find given the current file's extension")
+  "Alist of extensions to find given the current file's extension.")
 
 
 (defun glsl-man-completion-list ()
+  "Return list of all GLSL keywords."
   (append glsl-builtin-list glsl-deprecated-builtin-list))
 
 (defun glsl-find-man-page (thing)
+  "Collects and displays manual entry for GLSL built-in function THING."
   (interactive
    (let ((word (current-word nil t)))
-     (list 
+     (list
       (completing-read
        (concat "OpenGL.org GLSL man page: (" word "): ")
        (glsl-man-completion-list)
