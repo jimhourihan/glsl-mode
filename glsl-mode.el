@@ -128,6 +128,11 @@
     glsl-mode-map)
   "Keymap for GLSL major mode.")
 
+(defcustom glsl-browse-url-function 'browse-url
+  "Function used to display GLSL man pages. E.g. browse-url, eww, w3m, etc"
+  :type 'function
+  :group 'glsl)
+  
 (defcustom glsl-man-pages-base-url "http://www.opengl.org/sdk/docs/man/html/"
   "Location of GL man pages."
   :type 'string
@@ -248,7 +253,6 @@
   (defvar glsl-preprocessor-builtin-list
     '("__LINE__" "__FILE__" "__VERSION__"))
 
-  (autoload 'w3m-browse-url "w3m" "View URL using w3m")
   ) ; eval-and-compile
 
 (eval-when-compile
@@ -284,7 +288,7 @@
          glsl-deprecated-variable-name-face)
    (cons "gl_[A-Z][A-Za-z_]+" glsl-variable-name-face)
    )
-  "Minimal highlighting expressions for GLSL mode.")
+  "Highlighting expressions for GLSL mode.")
 
 
 (defvar glsl-font-lock-keywords glsl-font-lock-keywords-1
@@ -305,7 +309,6 @@
     )
   "Alist of extensions to find given the current file's extension.")
 
-
 (defun glsl-man-completion-list ()
   "Return list of all GLSL keywords."
   (append glsl-builtin-list glsl-deprecated-builtin-list))
@@ -320,12 +323,12 @@
        (glsl-man-completion-list)
        nil nil nil nil word))))
   (save-excursion
-    (browse-url
-     (concat glsl-man-pages-base-url thing ".xhtml"))))
+    (apply glsl-browse-url-function
+           (list (concat glsl-man-pages-base-url thing ".xhtml")))))
 
 ;;;###autoload
 (define-derived-mode glsl-mode c-mode "GLSL"
-  "Major mode for editing OpenGLSL shader files."
+  "Major mode for editing GLSL shader files."
   (set (make-local-variable 'font-lock-defaults) '(glsl-font-lock-keywords))
   (set (make-local-variable 'ff-other-file-alist) 'glsl-other-file-alist)
   (set (make-local-variable 'comment-start) "// ")
@@ -333,8 +336,5 @@
   (set (make-local-variable 'comment-padding) "")
   (add-to-list 'align-c++-modes 'glsl-mode)
   )
-
-                                        ;(easy-menu-define c-glsl-menu glsl-mode-map "GLSL Mode Commands"
-                                        ;		  (cons "GLSL" (c-lang-const c-mode-menu glsl)))
 
 ;;; glsl-mode.el ends here
