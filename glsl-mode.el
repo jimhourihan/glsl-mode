@@ -6,7 +6,7 @@
 ;; Authors: Xavier.Decoret@imag.fr,
 ;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.6, etc)
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
-;; Version: 2.1
+;; Version: 2.2
 ;; X-URL: https://github.com/jimhourihan/glsl-mode
 ;;
 ;; Original X-URL http://artis.inrialpes.fr/~Xavier.Decoret/resources/glsl-mode/
@@ -79,6 +79,10 @@
 
 (defconst gl-version "4.6"
   "OpenGL major mode version number.")
+
+(defvar glsl-mode-menu nil "Menu for GLSL mode")
+
+(defvar glsl-mode-hook nil "GLSL mode hook")
 
 (defvar glsl-type-face 'glsl-type-face)
 (defface glsl-type-face
@@ -326,15 +330,51 @@
     (apply glsl-browse-url-function
            (list (concat glsl-man-pages-base-url thing ".xhtml")))))
 
+(easy-menu-define glsl-menu glsl-mode-map
+  "GLSL Menu"
+    `("GLSL"
+      ["Comment Out Region"     comment-region
+       (c-fn-region-is-active-p)]
+      ["Uncomment Region"       (comment-region (region-beginning)
+						(region-end) '(4))
+       (c-fn-region-is-active-p)]
+      ["Indent Expression"      c-indent-exp
+       (memq (char-after) '(?\( ?\[ ?\{))]
+      ["Indent Line or Region"  c-indent-line-or-region t]
+      ["Fill Comment Paragraph" c-fill-paragraph t]
+      "----"
+      ["Backward Statement"     c-beginning-of-statement t]
+      ["Forward Statement"      c-end-of-statement t]
+      "----"
+      ["Up Conditional"         c-up-conditional t]
+      ["Backward Conditional"   c-backward-conditional t]
+      ["Forward Conditional"    c-forward-conditional t]
+      "----"
+      ["Backslashify"           c-backslash-region (c-fn-region-is-active-p)]
+      "----"
+      ["Find GLSL Man Page"  glsl-find-man-page t]
+      ))
+
 ;;;###autoload
-(define-derived-mode glsl-mode c-mode "GLSL"
+(define-derived-mode glsl-mode prog-mode "GLSL"
   "Major mode for editing GLSL shader files."
+  (c-initialize-cc-mode t)
+  (setq abbrev-mode t)
+  (c-init-language-vars-for 'c-mode)
+  (c-common-init 'c-mode)
+  (cc-imenu-init cc-imenu-c++-generic-expression)
   (set (make-local-variable 'font-lock-defaults) '(glsl-font-lock-keywords))
   (set (make-local-variable 'ff-other-file-alist) 'glsl-other-file-alist)
   (set (make-local-variable 'comment-start) "// ")
   (set (make-local-variable 'comment-end) "")
   (set (make-local-variable 'comment-padding) "")
+  (easy-menu-add glsl-menu)
   (add-to-list 'align-c++-modes 'glsl-mode)
+  (c-run-mode-hooks 'c-mode-common-hook)
+  (run-mode-hooks 'glsl-mode-hook)
+  :after-hook (progn (c-make-noise-macro-regexps)
+		     (c-make-macro-with-semi-re)
+		     (c-update-modeline))
   )
 
 ;;; glsl-mode.el ends here
