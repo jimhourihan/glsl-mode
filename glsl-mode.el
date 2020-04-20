@@ -6,7 +6,7 @@
 ;; Authors: Xavier.Decoret@imag.fr,
 ;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.6, etc)
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
-;; Version: 2.2
+;; Version: 2.3
 ;; X-URL: https://github.com/jimhourihan/glsl-mode
 ;;
 ;; Original X-URL http://artis.inrialpes.fr/~Xavier.Decoret/resources/glsl-mode/
@@ -123,6 +123,11 @@
   '((t (:inherit glsl-variable-name-face))) "glsl: deprecated variable face"
   :group 'glsl)
 
+(defvar glsl-reserved-keyword-face 'glsl-resered-keyword-face)
+(defface glsl-reserved-keyword-face
+  '((t (:inherit glsl-deprecated-keyword-face))) "glsl: reserved keyword face"
+  :group 'glsl)
+
 (defvar glsl-preprocessor-face 'glsl-preprocessor-face)
 (defface glsl-preprocessor-face
   '((t (:inherit font-lock-preprocessor-face))) "glsl: preprocessor face"
@@ -163,9 +168,9 @@
       "dmat2x3" "dmat2x4" "mat3x2" "mat3x3" "mat3x4" "dmat3x2" "dmat3x3"
       "dmat3x4" "mat4x2" "mat4x3" "mat4x4" "dmat4x2" "dmat4x3" "dmat4x4" "vec2"
       "vec3" "vec4" "ivec2" "ivec3" "ivec4" "bvec2" "bvec3" "bvec4" "dvec2"
-      "dvec3" "dvec4" "uint" "uvec2" "uvec3" "uvec4" "sampler1D" "sampler2D"
-      "sampler3D" "samplerCube" "sampler1DShadow" "sampler2DShadow"
-      "samplerCubeShadow" "sampler1DArray" "sampler2DArray"
+      "dvec3" "dvec4" "uint" "uvec2" "uvec3" "uvec4" "atomic_uint" 
+      "sampler1D" "sampler2D" "sampler3D" "samplerCube" "sampler1DShadow"
+      "sampler2DShadow" "samplerCubeShadow" "sampler1DArray" "sampler2DArray"
       "sampler1DArrayShadow" "sampler2DArrayShadow" "isampler1D" "isampler2D"
       "isampler3D" "isamplerCube" "isampler1DArray" "isampler2DArray"
       "usampler1D" "usampler2D" "usampler3D" "usamplerCube" "usampler1DArray"
@@ -180,21 +185,25 @@
       "uimageBuffer" "image1DArray" "iimage1DArray" "uimage1DArray"
       "image2DArray" "iimage2DArray" "uimage2DArray" "imageCubeArray"
       "iimageCubeArray" "uimageCubeArray" "image2DMS" "iimage2DMS" "uimage2DMS"
-      "image2DMSArray" "iimage2DMSArray" "uimage2DMSArray" "long" "short"
-      "half" "fixed" "unsigned" "hvec2" "hvec3" "hvec4" "fvec2" "fvec3" "fvec4"
-      "sampler3DRect"))
+      "image2DMSArray" "iimage2DMSArray" "uimage2DMSArray"))
 
   (defvar glsl-modifier-list
     '("attribute" "const" "uniform" "varying" "buffer" "shared" "coherent" "volatile" "restrict"
-      "readonly" "writeonly" "atomic_uint" "layout" "centroid" "flat" "smooth"
+      "readonly" "writeonly" "layout" "centroid" "flat" "smooth"
       "noperspective" "patch" "sample" "break" "continue" "do" "for" "while"
-      "switch" "case" "default" "if" "else" "subroutine" "in" "out" "inout"
+      "if" "else" "subroutine" "in" "out" "inout"
       "invariant" "discard" "return" "lowp" "mediump" "highp" "precision"
-      "struct" "common" "partition" "active" "asm" "class" "union" "enum"
-      "typedef" "template" "this" "packed" "resource" "goto" "inline" "noinline"
-      "public" "static" "extern" "external" "interface" "superp" "input" "output"
-      "filter" "sizeof" "cast" "namespace" "using" "row_major"
-      "early_fragment_tests"))
+      "struct" "switch" "default" "case" "superp" 
+      "row_major" "early_fragment_tests"))
+
+  (defvar glsl-reserved-list
+    '("input" "output" "asm" "class" "union" "enum" "typedef" "template" "this" 
+      "packed" "resource" "goto" "inline" "noinline"
+      "common" "partition" "active" "long" "short" "half" "fixed" "unsigned" 
+      "public" "static" "extern" "external" "interface" 
+      "hvec2" "hvec3" "hvec4" "fvec2" "fvec3" "fvec4"
+      "filter" "sizeof" "cast" "namespace" "using" 
+      "sampler3DRect"))
 
   (defvar glsl-deprecated-modifier-list
     '("varying" "attribute")) ; centroid is deprecated when used with varying
@@ -210,7 +219,7 @@
       "atomicCounterXor" "atomicCounterExchange" "atomicCounterCompSwap"
       "barrier" "bitCount" "bitfieldExtract" "bitfieldInsert" "bitfieldReverse"
       "ceil" "clamp" "cos" "cosh" "cross" "degrees" "determinant" "dFdx" "dFdy"
-      "dFdyFine" "dFdxFine" "dFdyCoarse" "dFdxCourse" "distance" "dot"
+      "dFdyFine" "dFdxFine" "dFdyCoarse" "dFdxCoarse" "distance" "dot"
       "fwidthFine" "fwidthCoarse"
       "EmitStreamVertex" "EmitStreamPrimitive" "EmitVertex" "EndPrimitive"
       "EndStreamPrimitive" "equal" "exp" "exp2" "faceforward" "findLSB"
@@ -229,7 +238,7 @@
       "packUnorm2x16" "packUnorm4x8" "pow" "radians" "reflect" "refract"
       "round" "roundEven" "sign" "sin" "sinh" "smoothstep" "sqrt" "step" "tan"
       "tanh" "texelFetch" "texelFetchOffset" "texture" "textureGather"
-      "textureGatherOffset" "textureGatherOffsets" "textureGrad"
+      "textureGatherOffset" "textureGatherOffsets" "textureGrad" "textureSamples"
       "textureGradOffset" "textureLod" "textureLodOffset" "textureOffset"
       "textureProj" "textureProjGrad" "textureProjGradOffset" "textureProjLod"
       "textureProjLodOffset" "textureProjOffset" "textureQueryLevels" "textureQueryLod"
@@ -279,6 +288,9 @@
    (cons (eval-when-compile
            (glsl-ppre glsl-deprecated-modifier-list))
          glsl-deprecated-keyword-face)
+   (cons (eval-when-compile
+           (glsl-ppre glsl-reserved-list))
+         glsl-reserved-keyword-face)
    (cons (eval-when-compile
            (glsl-ppre glsl-modifier-list))
          glsl-keyword-face)
