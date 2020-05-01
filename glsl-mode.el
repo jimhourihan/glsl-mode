@@ -6,7 +6,7 @@
 ;; Authors: Xavier.Decoret@imag.fr,
 ;;          Jim Hourihan <jimhourihan ~at~ gmail.com> (updated for 4.6, etc)
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
-;; Version: 2.3
+;; Version: 2.4
 ;; X-URL: https://github.com/jimhourihan/glsl-mode
 ;;
 ;; Original X-URL http://artis.inrialpes.fr/~Xavier.Decoret/resources/glsl-mode/
