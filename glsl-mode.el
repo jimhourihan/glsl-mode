@@ -100,7 +100,12 @@
 
 (defvar glsl-deprecated-builtin-face 'glsl-deprecated-builtin-face)
 (defface glsl-deprecated-builtin-face
-  '((t (:inherit glsl-builtin-face))) "glsl: deprecated builtin face"
+  '((t (:inherit font-lock-warning-face))) "glsl: deprecated builtin face"
+  :group 'glsl)
+
+(defvar glsl-qualifier-face 'glsl-qualifier-face)
+(defface glsl-qualifier-face
+  '((t (:inherit font-lock-keyword-face))) "glsl: qualifier face"
   :group 'glsl)
 
 (defvar glsl-keyword-face 'glsl-keyword-face)
@@ -110,7 +115,7 @@
 
 (defvar glsl-deprecated-keyword-face 'glsl-deprecated-keyword-face)
 (defface glsl-deprecated-keyword-face
-  '((t (:inherit glsl-keyword-face))) "glsl: deprecated keyword face"
+  '((t (:inherit font-lock-warning-face))) "glsl: deprecated keyword face"
   :group 'glsl)
 
 (defvar glsl-variable-name-face 'glsl-variable-name-face)
@@ -120,17 +125,48 @@
 
 (defvar glsl-deprecated-variable-name-face 'glsl-deprecated-variable-name-face)
 (defface glsl-deprecated-variable-name-face
-  '((t (:inherit glsl-variable-name-face))) "glsl: deprecated variable face"
+  '((t (:inherit font-lock-warning-face))) "glsl: deprecated variable face"
   :group 'glsl)
 
-(defvar glsl-reserved-keyword-face 'glsl-resered-keyword-face)
+(defvar glsl-reserved-keyword-face 'glsl-reserved-keyword-face)
 (defface glsl-reserved-keyword-face
-  '((t (:inherit glsl-deprecated-keyword-face))) "glsl: reserved keyword face"
+  '((t (:inherit glsl-keyword-face))) "glsl: reserved keyword face"
   :group 'glsl)
 
 (defvar glsl-preprocessor-face 'glsl-preprocessor-face)
 (defface glsl-preprocessor-face
   '((t (:inherit font-lock-preprocessor-face))) "glsl: preprocessor face"
+  :group 'glsl)
+
+(defcustom glsl-additional-types nil
+  "List of additional keywords to be considered types. These are
+added to the `glsl-type-list' and are fontified using the
+`glsl-type-face'. Examples of existing types include \"float\", \"vec4\",
+  and \"int\"."
+  :type '(repeat (string :tag "Type Name"))
+  :group 'glsl)
+
+(defcustom glsl-additional-qualifiers nil
+  "List of additional keywords to be considered qualifiers. These
+are added to the `glsl-qualifier-list' and are fontified using
+the `glsl-qualifier-face'. Examples of existing qualifiers
+include \"const\", \"in\", and \"out\"."
+  :type '(repeat (string :tag "Qualifier Name"))
+  :group 'glsl)
+
+(defcustom glsl-additional-keywords nil
+  "List of additional GLSL keywords. These are added to the
+`glsl-keyword-list' and are fontified using the
+`glsl-keyword-face'. Example existing keywords include \"while\",
+\"if\", and \"return\"."
+  :type '(repeat (string :tag "Keyword"))
+  :group 'glsl)
+
+(defcustom glsl-additional-built-ins nil
+  "List of additional functions to be considered built-in. These
+are added to the `glsl-builtin-list' and are fontified using the
+`glsl-builtin-face'."
+  :type '(repeat (string :tag "Keyword"))
   :group 'glsl)
 
 (defvar glsl-mode-hook nil)
@@ -187,25 +223,26 @@
       "iimageCubeArray" "uimageCubeArray" "image2DMS" "iimage2DMS" "uimage2DMS"
       "image2DMSArray" "iimage2DMSArray" "uimage2DMSArray"))
 
-  (defvar glsl-modifier-list
-    '("attribute" "const" "uniform" "varying" "buffer" "shared" "coherent" "volatile" "restrict"
-      "readonly" "writeonly" "layout" "centroid" "flat" "smooth"
-      "noperspective" "patch" "sample" "break" "continue" "do" "for" "while"
-      "if" "else" "subroutine" "in" "out" "inout"
-      "invariant" "discard" "return" "lowp" "mediump" "highp" "precision"
-      "struct" "switch" "default" "case" "superp" 
-      "row_major" "early_fragment_tests"))
+  (defvar glsl-qualifier-list
+    '("attribute" "const" "uniform" "varying" "buffer" "shared" "coherent"
+    "volatile" "restrict" "readonly" "writeonly" "layout" "centroid" "flat"
+    "smooth" "noperspective" "patch" "sample" "in" "out" "inout"
+    "invariant" "lowp" "mediump" "highp")) 
+
+  (defvar glsl-keyword-list
+    '("break" "continue" "do" "for" "while" "if" "else" "subroutine"
+      "discard" "return" "precision" "struct" "switch" "default" "case"))
 
   (defvar glsl-reserved-list
     '("input" "output" "asm" "class" "union" "enum" "typedef" "template" "this" 
       "packed" "resource" "goto" "inline" "noinline"
-      "common" "partition" "active" "long" "short" "half" "fixed" "unsigned" 
+      "common" "partition" "active" "long" "short" "half" "fixed" "unsigned" "superp"
       "public" "static" "extern" "external" "interface" 
       "hvec2" "hvec3" "hvec4" "fvec2" "fvec3" "fvec4"
       "filter" "sizeof" "cast" "namespace" "using" 
       "sampler3DRect"))
 
-  (defvar glsl-deprecated-modifier-list
+  (defvar glsl-deprecated-qualifier-list
     '("varying" "attribute")) ; centroid is deprecated when used with varying
 
   (defvar glsl-builtin-list
@@ -272,41 +309,59 @@
 
   ) ; eval-and-compile
 
-(eval-when-compile
+(eval-and-compile
   (defun glsl-ppre (re)
     (format "\\<\\(%s\\)\\>" (regexp-opt re))))
 
 (defvar glsl-font-lock-keywords-1
-  (list
-   (cons (eval-when-compile
-           (format "^[ \t]*#[ \t]*\\<\\(%s\\)\\>"
-                   (regexp-opt glsl-preprocessor-directive-list)))
-         glsl-preprocessor-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-type-list))
-         glsl-type-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-deprecated-modifier-list))
-         glsl-deprecated-keyword-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-reserved-list))
-         glsl-reserved-keyword-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-modifier-list))
-         glsl-keyword-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-preprocessor-builtin-list))
-         glsl-keyword-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-deprecated-builtin-list))
-         glsl-deprecated-builtin-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-builtin-list))
-         glsl-builtin-face)
-   (cons (eval-when-compile
-           (glsl-ppre glsl-deprecated-variables-list))
-         glsl-deprecated-variable-name-face)
-   (cons "gl_[A-Z][A-Za-z_]+" glsl-variable-name-face)
+  (append
+   (list
+    (cons (eval-when-compile
+            (format "^[ \t]*#[ \t]*\\<\\(%s\\)\\>"
+                    (regexp-opt glsl-preprocessor-directive-list)))
+          glsl-preprocessor-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-type-list))
+          glsl-type-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-deprecated-qualifier-list))
+          glsl-deprecated-keyword-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-reserved-list))
+          glsl-reserved-keyword-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-qualifier-list))
+          glsl-qualifier-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-keyword-list))
+          glsl-keyword-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-preprocessor-builtin-list))
+          glsl-keyword-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-deprecated-builtin-list))
+          glsl-deprecated-builtin-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-builtin-list))
+          glsl-builtin-face)
+    (cons (eval-when-compile
+            (glsl-ppre glsl-deprecated-variables-list))
+          glsl-deprecated-variable-name-face)
+    (cons "gl_[A-Z][A-Za-z_]+" glsl-variable-name-face)
+    )
+
+   (when glsl-additional-types
+     (list
+      (cons (glsl-ppre glsl-additional-types) glsl-type-face))) 
+   (when glsl-additional-keywords
+     (list
+      (cons (glsl-ppre glsl-additional-keywords) glsl-keyword-face))) 
+   (when glsl-additional-qualifiers
+     (list
+      (cons (glsl-ppre glsl-additional-qualifiers) glsl-qualifier-face)))
+   (when glsl-additional-built-ins
+     (list
+      (cons (glsl-ppre glsl-additional-built-ins) glsl-builtin-face)))
    )
   "Highlighting expressions for GLSL mode.")
 
