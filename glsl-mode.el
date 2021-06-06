@@ -27,7 +27,7 @@
 ;;; Commentary:
 
 ;; Major mode for editing OpenGLSL grammar files, usually files ending with
-;; `.vert', `.frag', `.glsl', `.geom'.  Is is based on c-mode plus some
+;; `.vert', `.frag', `.glsl', `.geom', '.comp'.  Is is based on c-mode plus some
 ;; features and pre-specified fontifications.
 ;;
 ;; Modifications from the 1.0 version of glsl-mode (jimhourihan):
@@ -60,6 +60,7 @@
 ;;   (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
 ;;   (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
 ;;   (add-to-list 'auto-mode-alist '("\\.geom\\'" . glsl-mode))
+;;   (add-to-list 'auto-mode-alist '("\\.comp\\'" . glsl-mode))
 
 ;; Reference:
 ;; https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf
@@ -192,6 +193,7 @@ are added to the `glsl-builtin-list' and are fontified using the
   (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.geom\\'" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\\.comp\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode)))
 
 (eval-and-compile
