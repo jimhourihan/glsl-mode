@@ -93,6 +93,15 @@
 
 (defvar glsl-mode-hook nil "GLSL mode hook.")
 
+(defvar glsl-extension-color "#A82848"
+  "Color used for extension specifiers.")
+
+(defvar glsl-extension-face 'glsl-extension-face)
+(defface glsl-extension-face
+  `((t (:foreground ,glsl-extension-color :weight bold)))
+  "Custom face for GLSL extension."
+  :group 'glsl)
+
 (defvar glsl-type-face 'glsl-type-face)
 (defface glsl-type-face
   '((t (:inherit font-lock-type-face)))
@@ -345,6 +354,7 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
 (defvar glsl--builtin-rx (regexp-opt glsl-builtin-list 'symbols))
 (defvar glsl--deprecated-variables-rx (glsl-ppre glsl-deprecated-variables-list))
 (defvar glsl--variables-rx "gl_[A-Z][A-Za-z_]+")
+(defvar glsl--extensions-rx "GL_[A-Z]+_[a-zA-Z][a-zA-Z_0-9]+")
 
 
 (defvar glsl-font-lock-keywords-1
@@ -360,7 +370,8 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
     (cons glsl--deprecated-builtin-rx glsl-deprecated-builtin-face)
     (cons glsl--builtin-rx glsl-builtin-face)
     (cons glsl--deprecated-variables-rx glsl-deprecated-variable-name-face)
-    (cons glsl--variables-rx glsl-variable-name-face)))
+    (cons glsl--variables-rx glsl-variable-name-face)
+    (cons glsl--extensions-rx glsl-extension-face)))
   "Highlighting expressions for GLSL mode.")
 
 
