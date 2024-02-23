@@ -2,10 +2,11 @@
 
 ;; Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
 ;; Copyright (C) 2011, 2014, 2019 Jim Hourihan
+;; Copyright (C) 2024 Gustaf Waldemarson
 ;;
-;; Authors: Xavier.Decoret@imag.fr,
+;; Authors: Gustaf Waldemarson <gustaf.waldemarson ~at~ gmail.com>
 ;;          Jim Hourihan <jimhourihan ~at~ gmail.com>
-;;          Gustaf Waldemarson <gustaf.waldemarson ~at~ gmail.com>
+;;          Xavier.Decoret@imag.fr,
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
 ;; Version: 3.0
 ;; URL: https://github.com/jimhourihan/glsl-mode
