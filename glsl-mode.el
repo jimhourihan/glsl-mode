@@ -1,4 +1,4 @@
-;;; glsl-mode.el --- Major mode for Open GLSL shader files
+;;; glsl-mode.el --- Major mode for Open GLSL shader files -*- lexical-binding: t -*-
 
 ;; Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
 ;; Copyright (C) 2011, 2014, 2019 Jim Hourihan
