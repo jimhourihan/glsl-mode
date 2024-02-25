@@ -41,6 +41,24 @@
   "Keywords that shoud be high-lighted.")
 
 
+(defun glsl-ts--shader-variables (shader-type)
+  "Create a list of special shader variables and constants for SHADER-TYPE."
+  (pcase shader-type
+    (:vert nil)
+    (:frag nil)
+    (:geom nil)
+    (:tesc nil)
+    (:tese nil)
+    (:mesh nil)
+    (:task nil)
+    (:comp nil)
+    (:rgen '("gl_RayFlagsSkipClosestHitShaderEXT" "gl_RayFlagsTerminateOnFirstHitEXT"))
+    (:rchit nil)
+    (:rahit nil)
+    (:rmiss nil)
+    (_ nil)))
+
+
 (defvar glsl-ts-font-lock-rules
   `(:language glsl
     :feature comment
@@ -98,10 +116,10 @@
    (((primitive_type) @font-lock-type-face)
     ((type_identifier) @font-lock-type-face))
 
-   ;; TODO: There are no rules for shader variables/constants in the grammar.
-   ;; :language glsl
-   ;; :feature shader-variables
-   ;; ()
+   :language glsl
+   :feature constant
+   (((identifier) @font-lock-constant-face
+     (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-variables :rgen)))) @font-lock-constant-face)))
 
    :language glsl
     :feature delimiter        ; TODO: Other brackets?
