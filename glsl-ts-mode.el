@@ -83,6 +83,11 @@
     :language glsl
     ([,@glsl-ts-keywords] @font-lock-keyword-face)
 
+    :feature builtin
+    :language glsl
+    (((identifier) @font-lock-builtin-face
+      (:match ,(rx-to-string `(seq bol (or ,@glsl-builtin-list) eol))
+              @font-lock-builtin-face)))
 
     :language glsl
     :feature qualifier
@@ -129,7 +134,7 @@
   (setq-local font-lock-defaults nil)
   (setq-local treesit-font-lock-feature-list
               '((comment definition)
-                (keyword preprocessor string type qualifier)
+                (keyword preprocessor string type qualifier builtin)
                 (assignment constant escape-sequence literal)
                 (delimiter variable)))
 
