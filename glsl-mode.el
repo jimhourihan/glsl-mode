@@ -419,7 +419,9 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
 
 ;;;###autoload
 (define-derived-mode glsl-mode prog-mode "GLSL"
-  "Major mode for editing GLSL shader files."
+  "Major mode for editing GLSL shader files.
+
+\\{glsl-mode-map}"
   (c-initialize-cc-mode t)
   (setq abbrev-mode t)
   (c-init-language-vars-for 'c-mode)
