@@ -5,7 +5,7 @@
 ;; Authors: Gustaf Waldemarson <gustaf.waldemarson ~at~ gmail.com>
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
 ;; Version: 1.0
-;; URL: https://github.com/Xaldew/glsl-mode
+;; URL: https://github.com/jimhourihan/glsl-mode
 ;; Package-Requires: ((emacs "29"))
 ;;
 
@@ -34,7 +34,7 @@
 
 
 (defvar glsl-ts-font-lock-rules
-  '(:language glsl
+  `(:language glsl
     :feature comment
     ((comment) @font-lock-comment-face)
 
@@ -58,7 +58,19 @@
                   (identifier) @font-lock-variable-name-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face)
                   (extension_storage_class) @font-lock-keyword-face
-                  (identifier) @font-lock-variable-name-face))
+                  (identifier) @font-lock-variable-name-face)
+     (declaration type: (_) declarator: (identifier) @font-lock-variable-name-face)
+     (init_declarator declarator: (identifier) @font-lock-variable-name-face)
+     (parameter_declaration type: (_) declarator: (identifier) @font-lock-variable-name-face)
+     (parameter_declaration (["in" "out" "inout"] @font-lock-keyword-face)
+                            type: (_) declarator: (identifier) @font-lock-variable-name-face)
+     (field_declaration type: (_)
+                        declarator: [(field_identifier) @font-lock-variable-name-face
+                                     (array_declarator declarator: (field_identifier) @font-lock-variable-name-face)])
+     (call_expression function:
+                      ((identifier) @font-lock-type-face
+                       (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face))))
+
 
     :language glsl
     :feature qualifier
