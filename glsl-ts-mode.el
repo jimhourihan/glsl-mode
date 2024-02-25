@@ -33,6 +33,14 @@
 (require 'glsl-mode)
 
 
+
+;; TODO: Add Keyword "discard" to GLSL grammar.
+(defvar glsl-ts-keywords
+  '("break" "continue" "do" "for" "while" "if" "else" ;; "discard"
+    "subroutine" "return" "switch" "default" "case")
+  "Keywords that shoud be high-lighted.")
+
+
 (defvar glsl-ts-font-lock-rules
   `(:language glsl
     :feature comment
@@ -70,6 +78,10 @@
      (call_expression function:
                       ((identifier) @font-lock-type-face
                        (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face))))
+
+    :feature keyword
+    :language glsl
+    ([,@glsl-ts-keywords] @font-lock-keyword-face)
 
 
     :language glsl
