@@ -450,10 +450,12 @@
     (((primitive_type) @font-lock-type-face)
      ((type_identifier) @font-lock-type-face))
 
-   :language glsl
-   :feature constant
-   (((identifier) @font-lock-constant-face
-     (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-variables :rgen)))) @font-lock-constant-face)))
+    :language glsl
+    :feature constant
+    (((identifier) @font-lock-constant-face
+      (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-constants shader-type)))) @font-lock-constant-face))
+     ((identifier) @glsl-shader-variable-name-face
+      (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-variables shader-type)))) @glsl-shader-variable-name-face)))
 
     :language glsl
     :feature delimiter        ; TODO: Other brackets?
