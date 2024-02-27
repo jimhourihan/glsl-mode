@@ -203,8 +203,10 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
   (add-to-list 'auto-mode-alist '("\\.task\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.comp\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.rgen\\'" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\\.rint\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.rchit\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.rahit\\'" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\\.rcall\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.rmiss\\'" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode)))
 
