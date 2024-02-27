@@ -59,7 +59,8 @@
     (_ nil)))
 
 
-(defvar glsl-ts-font-lock-rules
+(defun glsl-ts-font-lock-rules (shader-type)
+  "Generate tree-sitter font-locking rules for the given SHADER-TYPE."
   `(:language glsl
     :feature comment
     ((comment) @font-lock-comment-face)
@@ -111,30 +112,55 @@
     :feature qualifier
     (((type_qualifier) @font-lock-keyword-face))
 
-   :language glsl
-   :feature type
-   (((primitive_type) @font-lock-type-face)
-    ((type_identifier) @font-lock-type-face))
+    :language glsl
+    :feature type
+    (((primitive_type) @font-lock-type-face)
+     ((type_identifier) @font-lock-type-face))
 
    :language glsl
    :feature constant
    (((identifier) @font-lock-constant-face
      (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-variables :rgen)))) @font-lock-constant-face)))
 
-   :language glsl
+    :language glsl
     :feature delimiter        ; TODO: Other brackets?
-    (["(" ")" "{" "}"] @font-lock-bracket-face))
-  "Tree-sitter font-locking rules for GLSL mode.")
+    (["(" ")" "{" "}"] @font-lock-bracket-face)))
 
 
 (defvar glsl-ts-indent-rules nil
   "Tree-sitter indentation rules for GLSL mode.")
 
 
+(defvar glsl-ts-buffer-shader-type nil
+  "The current buffer shader-type.")
+
+
+(defun glsl-ts--detect-shader-type ()
+  "Attempt to detect which GLSL shader type is active in the current buffer."
+  (pcase (file-name-extension (buffer-file-name))
+    ((or "vert" "vs") :vert)
+    ((or "frag" "fs") :frag)
+    ((or "geom") :geom)
+    ((or "tesc") :tesc)
+    ((or "tese") :tese)
+    ((or "mesh") :mesh)
+    ((or "task") :task)
+    ((or "comp") :comp)
+    ((or "rgen") :rgen)
+    ((or "rint") :rint)
+    ((or "rchit") :rchit)
+    ((or "rahit") :rahit)
+    ((or "rcall") :rcall)
+    ((or "rmiss") :rmiss)
+    ((or "glsl") nil)
+    (_ nil)))
+
+
 (defun glsl-ts-setup ()
   "Setup treesitter for glsl-ts-mode."
   (setq-local treesit-font-lock-settings
-              (apply #'treesit-font-lock-rules glsl-ts-font-lock-rules))
+              (apply #'treesit-font-lock-rules
+                     (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
 
   (setq-local treesit-simple-indent-rules glsl-ts-indent-rules)
 
@@ -145,6 +171,8 @@
 (define-derived-mode glsl-ts-mode prog-mode "GLSL[ts]"
   "Major mode for editing GLSL shaders with tree-sitter."
   :syntax-table glsl-mode-syntax-table
+
+  (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
 
   ;; TODO: imenu settings.
 
