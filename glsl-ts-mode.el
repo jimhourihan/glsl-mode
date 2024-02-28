@@ -495,7 +495,7 @@
 
     :language glsl
     :feature delimiter        ; TODO: Other brackets?
-    (["(" ")" "{" "}"] @font-lock-bracket-face)))
+    (["(" ")" "{" "}" "[" "]"] @font-lock-bracket-face)))
 
 
 (defvar glsl-ts-indent-rules nil
