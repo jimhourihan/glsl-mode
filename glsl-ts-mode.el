@@ -353,6 +353,19 @@
   '("gl_LaunchIDEXT" "gl_LaunchSizeEXT")
   "Special variables in ray-tracing ray-gen shaders.")
 
+(defvar glsl-ts--ray-tracing-builtins
+  '("traceRayEXT"
+    "reportIntersectionEXT"
+    "ignoreIntersectionEXT"      ; Technically a keyword.
+    "terminateRayEXT"            ; Technically a keyword.
+    "executeCallableEXT")
+  "Special built-in functions available to ray-tracing shaders.")
+
+(defvar glsl-ts--mesh-builtins
+  '("EmitMeshTasksEXT" "SetMeshOutputsEXT")
+  "Special built-in functions available mesh shaders.")
+
+
 (defun glsl-ts--shader-constants (shader-type)
   "Create a list of special variables and constants for SHADER-TYPE."
   (pcase shader-type
@@ -391,6 +404,24 @@
     (:rmiss (append glsl-ts--ray-tracing-miss-shader-variables))
     (_ nil)))
 
+(defun glsl-ts--shader-builtins (shader-type)
+  "Create a list of shader builtin functions for SHADER-TYPE."
+  (pcase shader-type
+    (:vert  (append glsl-builtin-list))
+    (:frag  (append glsl-builtin-list))
+    (:geom  (append glsl-builtin-list))
+    (:tesc  (append glsl-builtin-list))
+    (:tese  (append glsl-builtin-list))
+    (:mesh  (append glsl-builtin-list glsl-ts--mesh-builtins))
+    (:task  (append glsl-builtin-list glsl-ts--mesh-builtins))
+    (:comp  (append glsl-builtin-list))
+    (:rgen  (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (:rint  (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (:rchit (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (:rahit (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (:rcall (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (:rmiss (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (_ nil)))
 
 (defun glsl-ts-font-lock-rules (shader-type)
   "Generate tree-sitter font-locking rules for the given SHADER-TYPE."
@@ -442,7 +473,7 @@
     :feature builtin
     :language glsl
     (((identifier) @font-lock-builtin-face
-      (:match ,(rx-to-string `(seq bol (or ,@glsl-builtin-list) eol))
+      (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-builtins shader-type)) eol))
               @font-lock-builtin-face)))
 
     :language glsl
