@@ -288,6 +288,9 @@
     "gl_RayFlagsSkipTrianglesEXT"       ; GL_EXT_ray_flags_primitive_culling.
     "gl_RayFlagsSkipAABBEXT"            ; GL_EXT_ray_flags_primitive_culling.
 
+    "gl_HitKindFrontFacingMicroTriangleNV" ; GL_NV_displacement_micromap.
+    "gl_HitKindBackFacingMicroTriangleNV"  ; GL_NV_displacement_micromap.
+
     "gl_HitKindFrontFacingTriangleEXT"
     "gl_HitKindBackFacingTriangleEXT")
   "Special constants used in ray-tracing shaders.")
@@ -337,8 +340,11 @@
     "gl_WorldToObject3x4EXT"
     "gl_ObjectToWorld3x4EXT"
 
-    "gl_CullMaskEXT"                    ; GL_EXT_ray_cull_mask
-    "gl_HitTriangleVertexPositionsEXT") ; GL_EXT_ray_tracing_position_fetch
+    "gl_HitMicroTriangleVertexPositionsNV"    ; GL_NV_displacement_micromap.
+    "gl_HitMicroTriangleVertexBarycentricsNV" ; GL_NV_displacement_micromap.
+
+    "gl_CullMaskEXT"                    ; GL_EXT_ray_cull_mask.
+    "gl_HitTriangleVertexPositionsEXT") ; GL_EXT_ray_tracing_position_fetch.
   "Special variables in ray-tracing closest-hit shaders.")
 
 (defvar glsl-ts--ray-tracing-any-hit-shader-variables
@@ -354,7 +360,7 @@
     "gl_RayTmaxEXT"
     "gl_IncomingRayFlagsEXT"
 
-    "gl_CullMaskEXT")                   ; GL_EXT_ray_cull_mask
+    "gl_CullMaskEXT")                   ; GL_EXT_ray_cull_mask.
   "Special variables in ray-tracing miss shaders.")
 
 (defvar glsl-ts--ray-tracing-callable-shader-variables
