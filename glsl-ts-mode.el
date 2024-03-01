@@ -283,6 +283,11 @@
     "gl_RayFlagsCullOpaqueEXT"
     "gl_RayFlagsCullNoOpaqueEXT"
 
+    "gl_RayFlagsForceOpacityMicromap2StateEXT" ; GL_EXT_opacity_micromap.
+
+    "gl_RayFlagsSkipTrianglesEXT"       ; GL_EXT_ray_flags_primitive_culling.
+    "gl_RayFlagsSkipAABBEXT"            ; GL_EXT_ray_flags_primitive_culling.
+
     "gl_HitKindFrontFacingTriangleEXT"
     "gl_HitKindBackFacingTriangleEXT")
   "Special constants used in ray-tracing shaders.")
@@ -332,7 +337,8 @@
     "gl_WorldToObject3x4EXT"
     "gl_ObjectToWorld3x4EXT"
 
-    "gl_HitTriangleVertexPositionsEXT")  ; GL_EXT_ray_tracing_position_fetch
+    "gl_CullMaskEXT"                    ; GL_EXT_ray_cull_mask
+    "gl_HitTriangleVertexPositionsEXT") ; GL_EXT_ray_tracing_position_fetch
   "Special variables in ray-tracing closest-hit shaders.")
 
 (defvar glsl-ts--ray-tracing-any-hit-shader-variables
@@ -346,7 +352,9 @@
     "gl_WorldRayDirectionEXT"
     "gl_RayTminEXT"
     "gl_RayTmaxEXT"
-    "gl_IncomingRayFlagsEXT")
+    "gl_IncomingRayFlagsEXT"
+
+    "gl_CullMaskEXT")                   ; GL_EXT_ray_cull_mask
   "Special variables in ray-tracing miss shaders.")
 
 (defvar glsl-ts--ray-tracing-callable-shader-variables
