@@ -30,6 +30,7 @@
 
 (require 'cc-mode)
 (require 'treesit)
+(require 'c-ts-mode)
 (require 'glsl-mode)
 
 
@@ -205,8 +206,7 @@
   "Special variables in tesellation control shaders.")
 
 (defvar glsl-ts--tesellation-evaluation-shader-variables
-  '(
-    "gl_PerVertex"
+  '("gl_PerVertex"
     "gl_Position"
     "gl_PointSize"
     "gl_ClipDistance"
@@ -549,6 +549,28 @@
     (_ nil)))
 
 
+(defvar glsl-ts--imenu-rules
+  (let ((pred #'c-ts-mode--defun-valid-p))
+    `(("Enum" "\\`enum_specifier\\'" ,pred nil)
+      ("Struct" "\\`struct_specifier\\'" ,pred nil)
+      ("Union" "\\`union_specifier\\'" ,pred nil)
+      ("Variable" ,(rx bos "declaration" eos) ,pred nil)
+      ("Function" "\\`function_definition\\'" ,pred nil)))
+  "Treesitter rules used to lookup IMenu related items.")
+
+
+(defvar glsl-ts--defun-navigation-regexp
+  (cons (regexp-opt (append '("function_definition"
+                              "type_definition"
+                              "struct_specifier"
+                              "enum_specifier"
+                              "union_specifier"
+                              "class_specifier"
+                              "namespace_definition")))
+        #'c-ts-mode--defun-valid-p)
+  "Regular expression used to navigate to the next defun.")
+
+
 (defun glsl-ts-setup ()
   "Setup treesitter for glsl-ts-mode."
   (setq-local treesit-font-lock-settings
@@ -557,17 +579,49 @@
 
   (setq-local treesit-simple-indent-rules glsl-ts-indent-rules)
 
+  ;; Navigation
+  (setq-local treesit-defun-type-regexp glsl-ts--defun-navigation-regexp)
+  (setq-local treesit-defun-skipper #'c-ts-mode--defun-skipper)
+  (setq-local treesit-defun-name-function #'c-ts-mode--defun-name)
+
+  ;; Nodes like struct/enum/union_specifier can appear in
+  ;; function_definitions, so we need to find the top-level node.
+  (setq-local treesit-defun-prefer-top-level t)
+  (setq-local treesit-defun-tactic 'top-level)
+
+  ;; IMenu.
+  (setq-local treesit-simple-imenu-settings glsl-ts--imenu-rules)
+
   (treesit-major-mode-setup))
+
+
+(defvar-keymap glsl-ts-mode-map
+  :doc "Keymap for GLSL."
+  :parent prog-mode-map)
 
 
 ;;;###autoload
 (define-derived-mode glsl-ts-mode prog-mode "GLSL[ts]"
-  "Major mode for editing GLSL shaders with tree-sitter."
+  "Major mode for editing GLSL shaders with tree-sitter.
+
+\\{glsl-ts-mode-map}"
   :syntax-table glsl-mode-syntax-table
 
   (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
 
-  ;; TODO: imenu settings.
+  ;; Find-file.
+  (setq-local ff-other-file-alist 'glsl-other-file-alist)
+
+  ;; Comment.
+  (c-ts-common-comment-setup)
+  (setq-local comment-start "/* ")
+  (setq-local comment-end " */")
+
+  ;; Electric
+  (setq-local electric-indent-chars (append "{}():;,#" electric-indent-chars))
+
+  ;; Align.
+  (add-to-list 'align-c++-modes 'glsl-ts-mode)
 
   ;; Font-lock settings.
   (setq-local font-lock-defaults nil)
@@ -576,8 +630,6 @@
                 (keyword preprocessor string type qualifier builtin)
                 (assignment constant escape-sequence literal)
                 (delimiter variable)))
-
-  ;; TODO: Indentation settings.
 
   (when (treesit-ready-p 'glsl)
     (treesit-parser-create 'glsl)
