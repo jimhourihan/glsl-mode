@@ -452,7 +452,15 @@
      (preproc_def "#define" @glsl-preprocessor-face
                   name: ((identifier) @font-lock-variable-name-face))
      (preproc_include "#include" @glsl-preprocessor-face
-                      ((string_literal) @font-lock-string-face)))
+                      ((string_literal) @font-lock-string-face))
+     (preproc_extension (preproc_directive) @glsl-preprocessor-face
+                        extension: (identifier) @glsl-extension-face
+                        ((extension_behavior) @font-lock-keyword-face
+                         (:match "require\\|enable" @font-lock-keyword-face)))
+     (preproc_extension (preproc_directive) @glsl-preprocessor-face
+                        extension: (identifier) @glsl-extension-face
+                        ((extension_behavior) @font-lock-warning-face
+                         (:match "warn\\|disable" @font-lock-warning-face))))
 
     :language glsl
     :feature definition
