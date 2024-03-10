@@ -235,6 +235,49 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
           (group-n 4 (or "warn" "disable")))))
 
 
+
+(eval-and-compile (c-add-language 'glsl-mode 'c-mode))
+
+
+(c-lang-defconst c-primitive-type-kwds
+  "Primitive type keywords.  As opposed to the other keyword lists, the
+keywords listed here are fontified with the type face instead of the
+keyword face.
+
+If any of these also are on `c-type-list-kwds', `c-ref-list-kwds',
+`c-colon-type-list-kwds', `c-paren-nontype-kwds', `c-paren-type-kwds',
+`c-<>-type-kwds', or `c-<>-arglist-kwds' then the associated clauses
+will be handled.
+
+Do not try to modify this list for end user customizations; the
+`*-font-lock-extra-types' variable, where `*' is the mode prefix, is
+the appropriate place for that."
+  glsl
+  (append
+   glsl-type-list
+   ;; Use append to not be destructive on the return value below.
+   (append
+    (c-lang-const c-primitive-type-kwds)
+    nil)))
+
+(c-lang-defconst c-modifier-kwds
+  glsl
+  (append (c-lang-const c-modifier-kwds)
+          '("in" "out" "inout" "uniform" "buffer" "rayPayloadEXT")))
+
+(c-lang-defconst c-paren-nontype-kwds
+  "Keywords that may be followed by a parenthesis expression."
+  glsl    '("layout"))
+
+(defconst glsl-font-lock-keywords-1 (c-lang-const c-matchers-1 glsl))
+(defconst glsl-font-lock-keywords-2 (c-lang-const c-matchers-2 glsl))
+(defconst glsl-font-lock-keywords-3 (c-lang-const c-matchers-3 glsl))
+(defvar glsl-font-lock-keywords (c-lang-const c-matchers-3 glsl))
+(defun glsl-font-lock-keywords ()
+  "Compose a list of font-locking keywords."
+  (c-compose-keywords-list glsl-font-lock-keywords))
+
+
 (defvar glsl-mode-syntax-table
   (let ((tbl (make-syntax-table c-mode-syntax-table)))
     tbl)
@@ -296,25 +339,20 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
 		     (c-make-macro-with-semi-re)
 		     (c-update-modeline))
   (c-initialize-cc-mode t)
-  (setq abbrev-mode t)
-  (c-init-language-vars-for 'c-mode)
-  (c-common-init 'c-mode)
+  (c-init-language-vars glsl-mode)
+  (c-common-init 'glsl-mode)
   (cc-imenu-init cc-imenu-c++-generic-expression)
+  (setq-local c-font-lock-extra-types (append glsl-additional-types))
 
+  (c-run-mode-hooks 'c-mode-common-hook)
+  (run-mode-hooks 'glsl-mode-hook)
+
+  (setq-local abbrev-mode t)
   (setq-local ff-other-file-alist 'glsl-other-file-alist)
   (setq-local comment-start "// ")
   (setq-local comment-end "")
   (setq-local comment-padding "")
-
-  (setq-local c-noise-macro-with-parens-names '("layout"))
-  (setq-local c-noise-macro-names '("buffer" "uniform" "in" "out"))
-
   (add-to-list 'align-c++-modes 'glsl-mode)
-  (c-run-mode-hooks 'c-mode-common-hook)
-  (run-mode-hooks 'glsl-mode-hook)
-
-  ;; (setq-local font-lock-defaults nil)
-  (setq-local c-font-lock-extra-types (append glsl-type-list glsl-additional-types))
 
   (font-lock-add-keywords
    nil
@@ -322,10 +360,8 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
      (,glsl--builtin-rx              . glsl-builtin-face)
      (,glsl--deprecated-variables-rx . glsl-deprecated-variable-name-face)
      (,glsl--variables-rx            . glsl-shader-variable-name-face)
-     ;; (,glsl--qualifier-rx            . glsl-qualifier-face)
      (,glsl--deprecated-keywords-rx  . glsl-deprecated-keyword-face)
      (,glsl--reserved-keywords-rx    . glsl-reserved-keyword-face)
-     (,glsl--keywords-rx             . glsl-keyword-face)
      (,glsl--extensions-rx (2 'glsl-extension-face nil lax)
                        (3 '(face font-lock-keyword-face) nil lax)
                        (4 '(face font-lock-warning-face) nil lax))))
