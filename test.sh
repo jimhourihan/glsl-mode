@@ -26,4 +26,4 @@ while :; do
     shift
 done
 
-emacs ${quick} -nw --eval="(load-theme 'tango-dark)" --load=glsl-mode.el --load=glsl-ts-mode.el ${1}
+emacs ${quick} -nw --eval="(load-theme 'tango-dark)" --load=glsl-db.el --load=glsl-mode.el --load=glsl-ts-mode.el ${1}
