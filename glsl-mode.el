@@ -144,6 +144,12 @@
   "GLSL preprocessor face."
   :group 'glsl)
 
+(defcustom glsl-indent-offset 4
+  "Number of spaces for each indentation step in `glsl-mode'and `glsl-ts-mode'."
+  :type 'integer
+  :safe 'integerp
+  :group 'glsl)
+
 (defcustom glsl-additional-types nil
   "List of additional keywords to be considered types.
 

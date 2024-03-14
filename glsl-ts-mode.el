@@ -573,11 +573,18 @@
 
 (defun glsl-ts-setup ()
   "Setup treesitter for glsl-ts-mode."
+
+  ;; Syntax-highlighting.
   (setq-local treesit-font-lock-settings
               (apply #'treesit-font-lock-rules
                      (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
 
-  (setq-local treesit-simple-indent-rules glsl-ts-indent-rules)
+  ;; Indentation.
+  (setq-local treesit-simple-indent-rules
+              (treesit--indent-rules-optimize
+               (c-ts-mode--get-indent-style 'c)))
+
+  (setq-local c-ts-mode-indent-offset glsl-indent-offset)
 
   ;; Navigation
   (setq-local treesit-defun-type-regexp glsl-ts--defun-navigation-regexp)
@@ -601,7 +608,7 @@
 
 
 ;;;###autoload
-(define-derived-mode glsl-ts-mode prog-mode "GLSL[ts]"
+(define-derived-mode glsl-ts-mode c-ts-mode "GLSL[ts]"
   "Major mode for editing GLSL shaders with tree-sitter.
 
 \\{glsl-ts-mode-map}"
