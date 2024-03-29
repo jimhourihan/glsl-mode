@@ -76,7 +76,7 @@
 (defvar glsl-deprecated-qualifier-list
   '("varying" "attribute")) ; centroid is deprecated when used with varying
 
-(defvar glsl-builtin-list
+(defvar glsl-builtins-list
   '("abs" "acos" "acosh" "all" "any" "anyInvocation" "allInvocations"
     "allInvocationsEqual" "asin" "asinh" "atan" "atanh"
     "atomicAdd" "atomicMin" "atomicMax" "atomicAnd" "atomicOr"
@@ -114,7 +114,7 @@
     "umulExtended" "unpackDouble2x32" "unpackHalf2x16" "unpackSnorm2x16"
     "unpackSnorm4x8" "unpackUnorm2x16" "unpackUnorm4x8" "usubBorrow"))
 
-(defvar glsl-deprecated-builtin-list
+(defvar glsl-deprecated-builtins-list
   '("noise1" "noise2" "noise3" "noise4"
     "texture1D" "texture1DProj" "texture1DLod" "texture1DProjLod"
     "texture2D" "texture2DProj" "texture2DLod" "texture2DProjLod"
@@ -135,7 +135,7 @@
 (defvar glsl-preprocessor-expr-list
   '("defined" "##"))
 
-(defvar glsl-preprocessor-builtin-list
+(defvar glsl-preprocessor-builtins-list
   '("__LINE__" "__FILE__" "__VERSION__"))
 
 
@@ -468,14 +468,47 @@
 (defvar glsl-ray-tracing-builtins
   '("traceRayEXT"
     "reportIntersectionEXT"
-    "ignoreIntersectionEXT"      ; Technically a keyword.
-    "terminateRayEXT"            ; Technically a keyword.
+    "ignoreIntersectionEXT"             ; Technically a keyword.
+    "terminateRayEXT"                   ; Technically a keyword.
     "executeCallableEXT")
   "Special built-in functions available to ray-tracing shaders.")
 
 (defvar glsl-mesh-builtins
   '("EmitMeshTasksEXT" "SetMeshOutputsEXT")
   "Special built-in functions available mesh shaders.")
+
+
+(defvar glsl-all-shader-constants
+  (delete-dups
+   (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+  "List of all special constants accross all shader types.")
+
+(defvar glsl-all-shader-variables
+  (delete-dups
+   (append glsl-vertex-shader-variables
+           glsl-fragment-shader-variables
+           glsl-geometry-shader-variables
+           glsl-tesellation-control-shader-variables
+           glsl-tesellation-evaluation-shader-variables
+           glsl-mesh-shader-variables
+           glsl-task-shader-variables
+           glsl-compute-shader-variables
+           glsl-ray-tracing-ray-gen-shader-variables
+           glsl-ray-tracing-intersection-shader-variables
+           glsl-ray-tracing-closest-hit-shader-variables
+           glsl-ray-tracing-any-hit-shader-variables
+           glsl-ray-tracing-miss-shader-variables
+           glsl-ray-tracing-callable-shader-variables))
+  "List of all special variables accross all shader types.")
+
+(defvar glsl-all-shader-builtins
+  (delete-dups
+   (append
+    glsl-builtins-list
+    glsl-ray-tracing-builtins
+    glsl-mesh-builtins))
+  "List of all special variables accross all shader types.")
+
 
 (provide 'glsl-db)
 

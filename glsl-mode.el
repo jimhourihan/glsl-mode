@@ -90,14 +90,14 @@
   "GLSL type face."
   :group 'glsl)
 
-(defvar glsl-builtin-face 'glsl-builtin-face)
-(defface glsl-builtin-face
-  '((t (:inherit font-lock-builtin-face)))
-  "GLSL builtin face."
+(defvar glsl-builtins-face 'glsl-builtins-face)
+(defface glsl-builtins-face
+  '((t (:inherit font-lock-builtins-face)))
+  "GLSL builtins face."
   :group 'glsl)
 
-(defvar glsl-deprecated-builtin-face 'glsl-deprecated-builtin-face)
-(defface glsl-deprecated-builtin-face
+(defvar glsl-deprecated-builtins-face 'glsl-deprecated-builtins-face)
+(defface glsl-deprecated-builtins-face
   '((t (:inherit font-lock-warning-face)))
   "GLSL deprecated builtins face."
   :group 'glsl)
@@ -180,8 +180,8 @@ the `glsl-keyword-face'.  Example existing keywords include
 (defcustom glsl-additional-built-ins nil
   "List of additional functions to be considered built-in.
 
-These are added to the `glsl-builtin-list' and are fontified using
-the `glsl-builtin-face'."
+These are added to the `glsl-builtins-list' and are fontified using
+the `glsl-builtins-face'."
   :type '(repeat (string :tag "Keyword"))
   :group 'glsl)
 
@@ -228,10 +228,11 @@ E.g. the function used by calls to 'browse-url', eww, w3m, etc."
 (defvar glsl--reserved-keywords-rx (regexp-opt glsl-reserved-list 'symbols))
 (defvar glsl--keywords-rx (regexp-opt glsl-keyword-list 'symbols))
 (defvar glsl--qualifier-rx (regexp-opt glsl-qualifier-list 'symbols))
-(defvar glsl--deprecated-builtin-rx (regexp-opt glsl-deprecated-builtin-list 'symbols))
-(defvar glsl--builtin-rx (regexp-opt glsl-builtin-list 'symbols))
+(defvar glsl--deprecated-builtins-rx (regexp-opt glsl-deprecated-builtins-list 'symbols))
+(defvar glsl--builtins-rx (regexp-opt glsl-all-shader-builtins 'symbols))
 (defvar glsl--deprecated-variables-rx (regexp-opt glsl-deprecated-variables-list 'symbols))
-(defvar glsl--variables-rx "gl_[A-Z][A-Za-z_]+")
+(defvar glsl--constants-rx (regexp-opt glsl-all-shader-constants 'symbols))
+(defvar glsl--variables-rx (regexp-opt glsl-all-shader-variables 'symbols))
 (defvar glsl--extensions-rx
   (rx (group-n 1 "#extension")
       (+ (in space))
@@ -296,7 +297,7 @@ the appropriate place for that."
 
 (defun glsl-man-completion-list ()
   "Return list of all GLSL keywords."
-  (append glsl-builtin-list glsl-deprecated-builtin-list))
+  (append glsl-builtins-list glsl-deprecated-builtins-list))
 
 (defun glsl-find-man-page (thing)
   "Collects and displays manual entry for GLSL built-in function THING."
@@ -362,10 +363,11 @@ the appropriate place for that."
 
   (font-lock-add-keywords
    nil
-   `((,glsl--deprecated-builtin-rx   . glsl-deprecated-builtin-face)
-     (,glsl--builtin-rx              . glsl-builtin-face)
+   `((,glsl--deprecated-builtins-rx  . glsl-deprecated-builtins-face)
+     (,glsl--builtins-rx             . glsl-builtins-face)
      (,glsl--deprecated-variables-rx . glsl-deprecated-variable-name-face)
      (,glsl--variables-rx            . glsl-shader-variable-name-face)
+     (,glsl--constants-rx            . font-lock-constant-face)
      (,glsl--deprecated-keywords-rx  . glsl-deprecated-keyword-face)
      (,glsl--reserved-keywords-rx    . glsl-reserved-keyword-face)
      (,glsl--extensions-rx (2 'glsl-extension-face nil lax)
@@ -374,7 +376,7 @@ the appropriate place for that."
 
   (let* ((rx-extra '((glsl-additional-keywords   . glsl-keyword-face)
                      (glsl-additional-qualifiers . glsl-qualifer-face)
-                     (glsl-additional-built-ins  . glsl-builtin-face)))
+                     (glsl-additional-built-ins  . glsl-builtins-face)))
          (fl-extras (cl-loop for (key . value) in rx-extra
                              when (eval key)
                              collect (cons (regexp-opt (eval key) 'symbol) value))))
