@@ -34,6 +34,24 @@
 (require 'glsl-mode)
 
 
+(defcustom glsl-ts-all-shader-variables t
+  "Always highlight all shader variables."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'glsl)
+
+(defcustom glsl-ts-all-shader-constants t
+  "Always highlight all shader constants."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'glsl)
+
+(defcustom glsl-ts-all-shader-builtins t
+  "Always highlight all shader builtins."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'glsl)
+
 ;; TODO: Add Keyword "discard" to GLSL grammar.
 (defvar glsl-ts-keywords
   '("break" "continue" "do" "for" "while" "if" "else" ;; "discard"
@@ -43,7 +61,7 @@
 
 (defun glsl-ts--shader-constants (shader-type)
   "Create a list of special variables and constants for SHADER-TYPE."
-  (pcase shader-type
+  (pcase (if glsl-ts-all-shader-constants :all shader-type)
     (:vert  (append glsl-common-shader-constants))
     (:frag  (append glsl-common-shader-constants))
     (:geom  (append glsl-common-shader-constants))
@@ -58,11 +76,12 @@
     (:rahit (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
     (:rcall (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
     (:rmiss (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+    (:all   (append glsl-all-shader-constants))
     (_ nil)))
 
 (defun glsl-ts--shader-variables (shader-type)
   "Create a list of special variables and constants for SHADER-TYPE."
-  (pcase shader-type
+  (pcase (if glsl-ts-all-shader-variables :all shader-type)
     (:vert  (append glsl-vertex-shader-variables))
     (:frag  (append glsl-fragment-shader-variables))
     (:geom  (append glsl-geometry-shader-variables))
@@ -77,11 +96,12 @@
     (:rahit (append glsl-ray-tracing-any-hit-shader-variables))
     (:rcall (append glsl-ray-tracing-callable-shader-variables))
     (:rmiss (append glsl-ray-tracing-miss-shader-variables))
+    (:all   (append glsl-all-shader-variables))
     (_ nil)))
 
 (defun glsl-ts--shader-builtins (shader-type)
   "Create a list of shader builtin functions for SHADER-TYPE."
-  (pcase shader-type
+  (pcase (if glsl-ts-all-shader-builtins :all shader-type)
     (:vert  (append glsl-builtins-list))
     (:frag  (append glsl-builtins-list))
     (:geom  (append glsl-builtins-list))
@@ -96,6 +116,7 @@
     (:rahit (append glsl-builtins-list glsl-ray-tracing-builtins))
     (:rcall (append glsl-builtins-list glsl-ray-tracing-builtins))
     (:rmiss (append glsl-builtins-list glsl-ray-tracing-builtins))
+    (:all   (append glsl-all-shader-builtins))
     (_ nil)))
 
 (defun glsl-ts-font-lock-rules (shader-type)
