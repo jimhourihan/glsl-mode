@@ -92,7 +92,7 @@
 
 (defvar glsl-builtins-face 'glsl-builtins-face)
 (defface glsl-builtins-face
-  '((t (:inherit font-lock-builtins-face)))
+  '((t (:inherit font-lock-builtin-face)))
   "GLSL builtins face."
   :group 'glsl)
 
@@ -349,7 +349,6 @@ the appropriate place for that."
   (c-init-language-vars glsl-mode)
   (c-common-init 'glsl-mode)
   (cc-imenu-init cc-imenu-c++-generic-expression)
-  (setq-local c-font-lock-extra-types (append glsl-additional-types))
 
   (c-run-mode-hooks 'c-mode-common-hook)
   (run-mode-hooks 'glsl-mode-hook)
