@@ -185,12 +185,10 @@ the `glsl-builtins-face'."
   :type '(repeat (string :tag "Keyword"))
   :group 'glsl)
 
-(defvar glsl-mode-hook nil)
-
 (defvar glsl-mode-map
-  (let ((glsl-mode-map (make-sparse-keymap)))
-    (define-key glsl-mode-map [S-iso-lefttab] 'ff-find-other-file)
-    glsl-mode-map)
+  (let ((map (make-sparse-keymap)))
+    (define-key map [S-iso-lefttab] 'ff-find-other-file)
+    map)
   "Keymap for GLSL major mode.")
 
 (defcustom glsl-browse-url-function #'browse-url
