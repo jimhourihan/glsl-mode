@@ -34,388 +34,49 @@
 (require 'glsl-mode)
 
 
-
 ;; TODO: Add Keyword "discard" to GLSL grammar.
 (defvar glsl-ts-keywords
   '("break" "continue" "do" "for" "while" "if" "else" ;; "discard"
     "subroutine" "return" "switch" "default" "case")
   "Keywords that shoud be high-lighted.")
 
-(defvar glsl-ts--common-shader-constants
-  '("gl_MaxVertexAttribs"
-    "gl_MaxVertexUniformVectors"
-    "gl_MaxVertexUniformComponents"
-    "gl_MaxVertexOutputComponents"
-    "gl_MaxVaryingComponents"
-    "gl_MaxVaryingVectors"
-    "gl_MaxVertexTextureImageUnits"
-    "gl_MaxVertexImageUniforms"
-    "gl_MaxVertexAtomicCounters"
-    "gl_MaxVertexAtomicCounterBuffers"
-
-    "gl_MaxTessPatchComponents"
-    "gl_MaxPatchVertices"
-    "gl_MaxTessGenLevel"
-
-    "gl_MaxTessControlInputComponents"
-    "gl_MaxTessControlOutputComponents"
-    "gl_MaxTessControlTextureImageUnits"
-    "gl_MaxTessControlUniformComponents"
-    "gl_MaxTessControlTotalOutputComponents"
-    "gl_MaxTessControlImageUniforms"
-    "gl_MaxTessControlAtomicCounters"
-    "gl_MaxTessControlAtomicCounterBuffers"
-
-    "gl_MaxTessEvaluationInputComponents"
-    "gl_MaxTessEvaluationOutputComponents"
-    "gl_MaxTessEvaluationTextureImageUnits"
-    "gl_MaxTessEvaluationUniformComponents"
-    "gl_MaxTessEvaluationImageUniforms"
-    "gl_MaxTessEvaluationAtomicCounters"
-    "gl_MaxTessEvaluationAtomicCounterBuffers"
-
-    "gl_MaxGeometryInputComponents"
-    "gl_MaxGeometryOutputComponents"
-    "gl_MaxGeometryImageUniforms"
-    "gl_MaxGeometryTextureImageUnits"
-    "gl_MaxGeometryOutputVertices"
-    "gl_MaxGeometryTotalOutputComponents"
-    "gl_MaxGeometryUniformComponents"
-    "gl_MaxGeometryVaryingComponents"       ; Deprecated
-    "gl_MaxGeometryAtomicCounters"
-    "gl_MaxGeometryAtomicCounterBuffers"
-
-    "gl_MaxFragmentImageUniforms"
-    "gl_MaxFragmentInputComponents"
-    "gl_MaxFragmentUniformVectors"
-    "gl_MaxFragmentUniformComponents"
-    "gl_MaxFragmentAtomicCounters"
-    "gl_MaxFragmentAtomicCounterBuffers"
-
-    "gl_MaxDrawBuffers"
-    "gl_MaxTextureImageUnits"
-    "gl_MinProgramTexelOffset"
-    "gl_MaxProgramTexelOffset"
-    "gl_MaxImageUnits"
-    "gl_MaxSamples"
-    "gl_MaxImageSamples"
-    "gl_MaxClipDistances"
-    "gl_MaxCullDistances"
-    "gl_MaxViewports"
-
-    "gl_MaxComputeImageUniforms"
-    "gl_MaxComputeWorkGroupCount"
-    "gl_MaxComputeWorkGroupSize"
-    "gl_MaxComputeUniformComponents"
-    "gl_MaxComputeTextureImageUnits"
-    "gl_MaxComputeAtomicCounters"
-    "gl_MaxComputeAtomicCounterBuffers"
-
-    "gl_MaxCombinedTextureImageUnits"
-    "gl_MaxCombinedImageUniforms"
-    "gl_MaxCombinedImageUnitsAndFragmentOutputs" ; Deprecated.
-    "gl_MaxCombinedShaderOutputResources"
-    "gl_MaxCombinedAtomicCounters"
-    "gl_MaxCombinedAtomicCounterBuffers"
-    "gl_MaxCombinedClipAndCullDistances"
-    "gl_MaxAtomicCounterBindings"
-    "gl_MaxAtomicCounterBufferSize"
-
-    "gl_MaxTransformFeedbackBuffers"
-    "gl_MaxTransformFeedbackInterleavedComponents"
-
-    "gl_MaxInputAttachments") ; Only present when targeting Vulkan.
-  "Special constants available to all GLSL shaders.")
-
-
-(defvar glsl-ts--vertex-shader-variables
-  '("gl_VertexID"                       ; Without GL_KHR_vulkan_glsl
-    "gl_InstanceID"                     ; Without GL_KHR_vulkan_glsl
-    "gl_VertexIndex"                    ; With GL_KHR_vulkan_glsl
-    "gl_InstanceIndex"                  ; With GL_KHR_vulkan_glsl
-    "gl_DrawID"
-    "gl_BaseVertex"
-    "gl_BaseInstance"
-
-    ;; "gl_PerVertex"
-    "gl_Position"                       ; Output variables.
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance")
-  "Special variables in vertex shaders.")
-
-(defvar glsl-ts--fragment-shader-variables
-  '("gl_FragCoord"
-    "gl_FrontFacing"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-    "gl_PointCoord"
-    "gl_PrimitiveID"
-    "gl_SampleID"
-    "gl_SamplePosition"
-    "gl_SampleMaskIn"
-    "gl_Layer"
-    "gl_ViewportIndex"
-    "gl_HelperInvocation"
-
-    "gl_FragDepth"     ; Output variables.
-    "gl_SampleMask")
-  "Special variables in fragment shaders.")
-
-(defvar glsl-ts--geometry-shader-variables
-  '("gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-    "gl_in"
-
-    "gl_PrimitiveIDIn"
-    "gl_InvocationID"
-
-    ;; "gl_PerVertex"
-    "gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-
-    "gl_PrimitiveID"
-    "gl_Layer"
-    "gl_ViewportIndex")
-  "Special variables in geometry shaders.")
-
-(defvar glsl-ts--tesellation-control-shader-variables
-  '("gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-    "gl_in"
-
-    "gl_PatchVerticesIn"
-    "gl_PrimitiveID"
-    "gl_InvocationID"
-
-    ;; "gl_PerVertex"
-    "gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-    "gl_out"
-
-    "gl_TessLevelOuter"
-    "gl_TessLevelInner")
-  "Special variables in tesellation control shaders.")
-
-(defvar glsl-ts--tesellation-evaluation-shader-variables
-  '("gl_PerVertex"
-    "gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-    "gl_in"
-
-    "gl_PatchVerticesIn"
-    "gl_PrimitiveID"
-    "gl_TessCoord"
-    "gl_TessLevelOuter"
-    "gl_TessLevelInner"
-
-    ;; "gl_PerVertex"
-    "gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance")
-  "Special variables in tesellation evaluation shaders.")
-
-(defvar glsl-ts--mesh-shader-variables
-  '("gl_NumWorkGroups"
-    "gl_WorkGroupSize"
-    "gl_WorkGroupID"
-    "gl_LocalInvocationID"
-    "gl_GlobalInvocationID"
-    "gl_LocalInvocationIndex"
-    "gl_PrimitivePointIndicesEXT"
-    "gl_PrimitiveLineIndicesEXT"
-    "gl_PrimitiveTriangleIndicesEXT"
-
-    ;; "gl_MeshPerVertexEXT"
-    ;; "gl_MeshVerticesEXT"
-    "gl_MeshPerPrimitiveEXT"
-    "gl_MeshPrimitivesEXT"
-
-    "gl_Position"
-    "gl_PointSize"
-    "gl_ClipDistance"
-    "gl_CullDistance"
-
-    "gl_PrimitiveID"
-    "gl_Layer"
-    "gl_ViewportIndex"
-    "gl_CullPrimitiveEXT"
-    "gl_PrimitiveShadingRateEXT")
-  "Special variables in mesh shaders.")
-
-(defvar glsl-ts--task-shader-variables
-  '("gl_NumWorkGroups"
-    "gl_WorkGroupSize"
-    "gl_WorkGroupID"
-    "gl_LocalInvocationID"
-    "gl_GlobalInvocationID"
-    "gl_LocalInvocationIndex")
-  "Special variables in task shaders.")
-
-(defvar glsl-ts--compute-shader-variables
-  '("gl_NumWorkGroups"
-    "gl_WorkGroupSize"
-    "gl_WorkGroupID"
-    "gl_LocalInvocationID"
-    "gl_GlobalInvocationID"
-    "gl_LocalInvocationIndex")
-  "Special variables in compute shaders.")
-
-(defvar glsl-ts--ray-tracing-shader-constants
-  '("gl_RayFlagsNoneEXT"
-    "gl_RayFlagsOpaqueEXT"
-    "gl_RayFlagsNoOpaqueEXT"
-    "gl_RayFlagsTerminateOnFirstHitEXT"
-    "gl_RayFlagsSkipClosestHitShaderEXT"
-    "gl_RayFlagsCullBackFacingTrianglesEXT"
-    "gl_RayFlagsCullFrontFacingTrianglesEXT"
-    "gl_RayFlagsCullOpaqueEXT"
-    "gl_RayFlagsCullNoOpaqueEXT"
-
-    "gl_RayFlagsForceOpacityMicromap2StateEXT" ; GL_EXT_opacity_micromap.
-
-    "gl_RayFlagsSkipTrianglesEXT"       ; GL_EXT_ray_flags_primitive_culling.
-    "gl_RayFlagsSkipAABBEXT"            ; GL_EXT_ray_flags_primitive_culling.
-
-    "gl_HitKindFrontFacingMicroTriangleNV" ; GL_NV_displacement_micromap.
-    "gl_HitKindBackFacingMicroTriangleNV"  ; GL_NV_displacement_micromap.
-
-    "gl_HitKindFrontFacingTriangleEXT"
-    "gl_HitKindBackFacingTriangleEXT")
-  "Special constants used in ray-tracing shaders.")
-
-(defvar glsl-ts--ray-tracing-ray-gen-shader-variables
-  '("gl_LaunchIDEXT" "gl_LaunchSizeEXT")
-  "Special variables in ray-tracing ray-gen shaders.")
-
-(defvar glsl-ts--ray-tracing-intersection-shader-variables
-  '("gl_LaunchIDEXT"
-    "gl_LaunchSizeEXT"
-    "gl_PrimitiveID"
-    "gl_InstanceID"
-    "gl_InstanceCustomIndexEXT"
-    "gl_GeometryIndexEXT"
-    "gl_WorldRayOriginEXT"
-    "gl_WorldRayDirectionEXT"
-    "gl_ObjectRayOriginEXT"
-    "gl_ObjectRayDirectionEXT"
-    "gl_RayTminEXT"
-    "gl_RayTmaxEXT"
-    "gl_IncomingRayFlagsEXT"
-    "gl_ObjectToWorldEXT"
-    "gl_ObjectToWorld3x4EXT"
-    "gl_WorldToObjectEXT"
-    "gl_WorldToObject3x4EXT")
-  "Special variables in ray-tracing ray-gen shaders.")
-
-(defvar glsl-ts--ray-tracing-closest-hit-shader-variables
-  '("gl_LaunchIDEXT"
-    "gl_LaunchSizeEXT"
-    "gl_PrimitiveID"
-    "gl_InstanceID"
-    "gl_InstanceCustomIndexEXT"
-    "gl_GeometryIndexEXT"
-    "gl_WorldRayOriginEXT"
-    "gl_WorldRayDirectionEXT"
-    "gl_ObjectRayOriginEXT"
-    "gl_ObjectRayDirectionEXT"
-    "gl_RayTminEXT"
-    "gl_RayTmaxEXT"
-    "gl_IncomingRayFlagsEXT"
-    "gl_HitTEXT"
-    "gl_HitKindEXT"
-    "gl_ObjectToWorldEXT"
-    "gl_WorldToObjectEXT"
-    "gl_WorldToObject3x4EXT"
-    "gl_ObjectToWorld3x4EXT"
-
-    "gl_HitMicroTriangleVertexPositionsNV"    ; GL_NV_displacement_micromap.
-    "gl_HitMicroTriangleVertexBarycentricsNV" ; GL_NV_displacement_micromap.
-
-    "gl_CullMaskEXT"                    ; GL_EXT_ray_cull_mask.
-    "gl_HitTriangleVertexPositionsEXT") ; GL_EXT_ray_tracing_position_fetch.
-  "Special variables in ray-tracing closest-hit shaders.")
-
-(defvar glsl-ts--ray-tracing-any-hit-shader-variables
-  glsl-ts--ray-tracing-closest-hit-shader-variables
-  "Special variables in ray-tracing any-hit shaders.")
-
-(defvar glsl-ts--ray-tracing-miss-shader-variables
-  '("gl_LaunchIDEXT"
-    "gl_LaunchSizeEXT"
-    "gl_WorldRayOriginEXT"
-    "gl_WorldRayDirectionEXT"
-    "gl_RayTminEXT"
-    "gl_RayTmaxEXT"
-    "gl_IncomingRayFlagsEXT"
-
-    "gl_CullMaskEXT")                   ; GL_EXT_ray_cull_mask.
-  "Special variables in ray-tracing miss shaders.")
-
-(defvar glsl-ts--ray-tracing-callable-shader-variables
-  '("gl_LaunchIDEXT" "gl_LaunchSizeEXT")
-  "Special variables in ray-tracing ray-gen shaders.")
-
-(defvar glsl-ts--ray-tracing-builtins
-  '("traceRayEXT"
-    "reportIntersectionEXT"
-    "ignoreIntersectionEXT"      ; Technically a keyword.
-    "terminateRayEXT"            ; Technically a keyword.
-    "executeCallableEXT")
-  "Special built-in functions available to ray-tracing shaders.")
-
-(defvar glsl-ts--mesh-builtins
-  '("EmitMeshTasksEXT" "SetMeshOutputsEXT")
-  "Special built-in functions available mesh shaders.")
-
 
 (defun glsl-ts--shader-constants (shader-type)
   "Create a list of special variables and constants for SHADER-TYPE."
   (pcase shader-type
-    (:vert  (append glsl-ts--common-shader-constants))
-    (:frag  (append glsl-ts--common-shader-constants))
-    (:geom  (append glsl-ts--common-shader-constants))
-    (:tesc  (append glsl-ts--common-shader-constants))
-    (:tese  (append glsl-ts--common-shader-constants))
-    (:mesh  (append glsl-ts--common-shader-constants))
-    (:task  (append glsl-ts--common-shader-constants))
-    (:comp  (append glsl-ts--common-shader-constants))
-    (:rgen  (append glsl-ts--common-shader-constants glsl-ts--ray-tracing-shader-constants))
-    (:rint  (append glsl-ts--common-shader-constants glsl-ts--ray-tracing-shader-constants))
-    (:rchit (append glsl-ts--common-shader-constants glsl-ts--ray-tracing-shader-constants))
-    (:rahit (append glsl-ts--common-shader-constants glsl-ts--ray-tracing-shader-constants))
-    (:rcall (append glsl-ts--common-shader-constants glsl-ts--ray-tracing-shader-constants))
-    (:rmiss (append glsl-ts--common-shader-constants glsl-ts--ray-tracing-shader-constants))
+    (:vert  (append glsl-common-shader-constants))
+    (:frag  (append glsl-common-shader-constants))
+    (:geom  (append glsl-common-shader-constants))
+    (:tesc  (append glsl-common-shader-constants))
+    (:tese  (append glsl-common-shader-constants))
+    (:mesh  (append glsl-common-shader-constants))
+    (:task  (append glsl-common-shader-constants))
+    (:comp  (append glsl-common-shader-constants))
+    (:rgen  (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+    (:rint  (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+    (:rchit (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+    (:rahit (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+    (:rcall (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
+    (:rmiss (append glsl-common-shader-constants glsl-ray-tracing-shader-constants))
     (_ nil)))
 
 (defun glsl-ts--shader-variables (shader-type)
   "Create a list of special variables and constants for SHADER-TYPE."
   (pcase shader-type
-    (:vert  (append glsl-ts--vertex-shader-variables))
-    (:frag  (append glsl-ts--fragment-shader-variables))
-    (:geom  (append glsl-ts--geometry-shader-variables))
-    (:tesc  (append glsl-ts--tesellation-control-shader-variables))
-    (:tese  (append glsl-ts--tesellation-evaluation-shader-variables))
-    (:mesh  (append glsl-ts--mesh-shader-variables))
-    (:task  (append glsl-ts--task-shader-variables))
-    (:comp  (append glsl-ts--compute-shader-variables))
-    (:rgen  (append glsl-ts--ray-tracing-ray-gen-shader-variables))
-    (:rint  (append glsl-ts--ray-tracing-intersection-shader-variables))
-    (:rchit (append glsl-ts--ray-tracing-closest-hit-shader-variables))
-    (:rahit (append glsl-ts--ray-tracing-any-hit-shader-variables))
-    (:rcall (append glsl-ts--ray-tracing-callable-shader-variables))
-    (:rmiss (append glsl-ts--ray-tracing-miss-shader-variables))
+    (:vert  (append glsl-vertex-shader-variables))
+    (:frag  (append glsl-fragment-shader-variables))
+    (:geom  (append glsl-geometry-shader-variables))
+    (:tesc  (append glsl-tesellation-control-shader-variables))
+    (:tese  (append glsl-tesellation-evaluation-shader-variables))
+    (:mesh  (append glsl-mesh-shader-variables))
+    (:task  (append glsl-task-shader-variables))
+    (:comp  (append glsl-compute-shader-variables))
+    (:rgen  (append glsl-ray-tracing-ray-gen-shader-variables))
+    (:rint  (append glsl-ray-tracing-intersection-shader-variables))
+    (:rchit (append glsl-ray-tracing-closest-hit-shader-variables))
+    (:rahit (append glsl-ray-tracing-any-hit-shader-variables))
+    (:rcall (append glsl-ray-tracing-callable-shader-variables))
+    (:rmiss (append glsl-ray-tracing-miss-shader-variables))
     (_ nil)))
 
 (defun glsl-ts--shader-builtins (shader-type)
@@ -426,15 +87,15 @@
     (:geom  (append glsl-builtin-list))
     (:tesc  (append glsl-builtin-list))
     (:tese  (append glsl-builtin-list))
-    (:mesh  (append glsl-builtin-list glsl-ts--mesh-builtins))
-    (:task  (append glsl-builtin-list glsl-ts--mesh-builtins))
+    (:mesh  (append glsl-builtin-list glsl-mesh-builtins))
+    (:task  (append glsl-builtin-list glsl-mesh-builtins))
     (:comp  (append glsl-builtin-list))
-    (:rgen  (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
-    (:rint  (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
-    (:rchit (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
-    (:rahit (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
-    (:rcall (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
-    (:rmiss (append glsl-builtin-list glsl-ts--ray-tracing-builtins))
+    (:rgen  (append glsl-builtin-list glsl-ray-tracing-builtins))
+    (:rint  (append glsl-builtin-list glsl-ray-tracing-builtins))
+    (:rchit (append glsl-builtin-list glsl-ray-tracing-builtins))
+    (:rahit (append glsl-builtin-list glsl-ray-tracing-builtins))
+    (:rcall (append glsl-builtin-list glsl-ray-tracing-builtins))
+    (:rmiss (append glsl-builtin-list glsl-ray-tracing-builtins))
     (_ nil)))
 
 (defun glsl-ts-font-lock-rules (shader-type)
