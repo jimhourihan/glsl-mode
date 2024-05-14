@@ -167,6 +167,7 @@
      (field_declaration type: (_)
                         declarator: [(field_identifier) @font-lock-variable-name-face
                                      (array_declarator declarator: (field_identifier) @font-lock-variable-name-face)])
+     (array_declarator declarator: (identifier) @font-lock-variable-name-face)
      (call_expression function:
                       ((identifier) @font-lock-type-face
                        (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face))))
