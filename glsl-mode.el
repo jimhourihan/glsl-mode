@@ -275,7 +275,9 @@ the appropriate place for that."
 (c-lang-defconst c-modifier-kwds
   glsl
   (append (c-lang-const c-modifier-kwds)
-          '("in" "out" "inout" "uniform" "buffer" "rayPayloadEXT")))
+          '("in" "out" "inout" "uniform" "buffer"
+            "coherent" "readonly" "writeonly"
+            "hitAttributeEXT" "rayPayloadEXT" "rayPayloadInEXT")))
 
 (c-lang-defconst c-paren-nontype-kwds
   "Keywords that may be followed by a parenthesis expression."
