@@ -273,6 +273,10 @@ the appropriate place for that."
     (c-lang-const c-primitive-type-kwds)
     nil)))
 
+(c-lang-defconst c-constant-kwds
+  "Keywords for constants."
+  glsl (append (c-lang-const c-constant-kwds c)))
+
 (c-lang-defconst c-modifier-kwds
   glsl
   (append (c-lang-const c-modifier-kwds)
