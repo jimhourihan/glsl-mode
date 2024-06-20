@@ -194,6 +194,7 @@ the `glsl-builtins-face'."
 
 (defvar glsl-mode-map
   (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map c-mode-map)
     (define-key map [S-iso-lefttab] 'ff-find-other-file)
     map)
   "Keymap for GLSL major mode.")
