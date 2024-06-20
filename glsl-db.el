@@ -30,7 +30,7 @@
 ;;; Code:
 
 (defvar glsl-type-list
-  '("float" "double" "int" "void" "bool" "true" "false" "mat2" "mat3"
+  '("float" "double" "int" "void" "bool" "mat2" "mat3"
     "mat4" "dmat2" "dmat3" "dmat4" "mat2x2" "mat2x3" "mat2x4" "dmat2x2"
     "dmat2x3" "dmat2x4" "mat3x2" "mat3x3" "mat3x4" "dmat3x2" "dmat3x3"
     "dmat3x4" "mat4x2" "mat4x3" "mat4x4" "dmat4x2" "dmat4x3" "dmat4x4" "vec2"
