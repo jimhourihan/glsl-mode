@@ -269,9 +269,7 @@ the appropriate place for that."
   (append
    glsl-type-list
    ;; Use append to not be destructive on the return value below.
-   (append
-    (c-lang-const c-primitive-type-kwds)
-    nil)))
+   (c-lang-const c-primitive-type-kwds c)))
 
 (c-lang-defconst c-constant-kwds
   "Keywords for constants."
