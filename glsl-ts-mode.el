@@ -52,6 +52,19 @@
   :safe 'booleanp
   :group 'glsl)
 
+(defcustom glsl-ts-indent-style t
+  "Style to use for indentation.
+
+This style is passed directly to the "
+  :type '(choice (symbol :tag "Gnu" gnu)
+                 (symbol :tag "K&R" k&r)
+                 (symbol :tag "Linux" linux)
+                 (symbol :tag "BSD" bsd)
+                 (function :tag "A function for user customized style" ignore))
+  :set #'c-ts-mode--indent-style-setter
+  :safe 'c-ts-indent-style-safep
+  :group 'glsl)
+
 ;; TODO: Add Keyword "discard" to GLSL grammar.
 (defvar glsl-ts-keywords
   '("break" "continue" "do" "for" "while" "if" "else" ;; "discard"
@@ -265,7 +278,7 @@
   ;; Indentation.
   (setq-local treesit-simple-indent-rules
               (treesit--indent-rules-optimize
-               (c-ts-mode--get-indent-style 'c)))
+               (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
 
   (setq-local c-ts-mode-indent-offset glsl-indent-offset)
 
