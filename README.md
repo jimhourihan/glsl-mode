@@ -9,7 +9,7 @@ In brief, it provides the following features:
 - Syntax high-lighting for symbols and built-in functions and variables.
 
 - Indentation for the current line (<kbd>TAB</kbd>) and selected region
-  (<kbd>C-M-\</kbd>).
+  (<kbd>C-M-\\</kbd>).
 
 - Fast switching between 'file.vert' and 'file.frag' with `ff-find-other-file`
   (<kbd>S-iso-lefttab</kbd>).
