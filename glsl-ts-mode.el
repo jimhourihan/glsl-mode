@@ -144,8 +144,12 @@ This style is passed directly to the "
     ;; extension specifications.
     ((preproc_call (preproc_directive) @glsl-preprocessor-face
                    ((preproc_arg) @glsl-extension-face))
+     (preproc_ifdef "#ifndef" @glsl-preprocessor-face
+                    name: ((identifier) @font-lock-variable-name-face))
      (preproc_def "#define" @glsl-preprocessor-face
                   name: ((identifier) @font-lock-variable-name-face))
+     (preproc_function_def "#define" @glsl-preprocessor-face
+                           name: ((identifier) @font-lock-function-name-face))
      (preproc_include "#include" @glsl-preprocessor-face
                       ((string_literal) @font-lock-string-face))
      (preproc_extension (preproc_directive) @glsl-preprocessor-face
@@ -155,11 +159,19 @@ This style is passed directly to the "
      (preproc_extension (preproc_directive) @glsl-preprocessor-face
                         extension: (identifier) @glsl-extension-face
                         ((extension_behavior) @font-lock-warning-face
-                         (:match "warn\\|disable" @font-lock-warning-face))))
+                         (:match "warn\\|disable" @font-lock-warning-face)))
+     (preproc_params
+      (identifier) @font-lock-variable-name-face)
+     (preproc_defined
+      "defined" @glsl-preprocessor-face
+      "(" @glsl-preprocessor-face
+      (identifier) @font-lock-variable-name-face
+      ")" @glsl-preprocessor-face))
 
     :language glsl
     :feature definition
     ((function_declarator declarator: (_) @font-lock-function-name-face)
+     (struct_specifier "struct" @font-lock-keyword-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face)
                   ["buffer" @font-lock-keyword-face
                    "uniform" @font-lock-keyword-face]
@@ -329,10 +341,10 @@ This style is passed directly to the "
   ;; Font-lock settings.
   (setq-local font-lock-defaults nil)
   (setq-local treesit-font-lock-feature-list
-              '((comment definition)
+              '((comment document definition)
                 (keyword preprocessor string type qualifier builtin)
                 (assignment constant escape-sequence literal)
-                (delimiter variable)))
+                (bracket delimiter error function operator property variable)))
 
   (when (treesit-ready-p 'glsl)
     (treesit-parser-create 'glsl)
