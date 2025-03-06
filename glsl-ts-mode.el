@@ -265,7 +265,7 @@
   ;; Indentation.
   (setq-local treesit-simple-indent-rules
               (treesit--indent-rules-optimize
-               (c-ts-mode--get-indent-style 'c)))
+               (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
 
   (setq-local c-ts-mode-indent-offset glsl-indent-offset)
 
@@ -291,7 +291,7 @@
 
 
 ;;;###autoload
-(define-derived-mode glsl-ts-mode c-ts-mode "GLSL[ts]"
+(define-derived-mode glsl-ts-mode prog-mode "GLSL[ts]"
   "Major mode for editing GLSL shaders with tree-sitter.
 
 \\{glsl-ts-mode-map}"
