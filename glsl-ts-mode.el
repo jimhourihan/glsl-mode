@@ -146,6 +146,7 @@ This style is passed directly to the "
                    ((preproc_arg) @glsl-extension-face))
      (preproc_ifdef "#ifndef" @glsl-preprocessor-face
                     name: ((identifier) @font-lock-variable-name-face))
+     (["#endif"] @glsl-preprocessor-face)
      (preproc_def "#define" @glsl-preprocessor-face
                   name: ((identifier) @font-lock-variable-name-face))
      (preproc_function_def "#define" @glsl-preprocessor-face
