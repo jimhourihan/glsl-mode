@@ -112,7 +112,8 @@
     "textureProjLodOffset" "textureProjOffset" "textureQueryLevels" "textureQueryLod"
     "textureSize" "transpose" "trunc" "uaddCarry" "uintBitsToFloat"
     "umulExtended" "unpackDouble2x32" "unpackHalf2x16" "unpackSnorm2x16"
-    "unpackSnorm4x8" "unpackUnorm2x16" "unpackUnorm4x8" "usubBorrow"))
+    "unpackSnorm4x8" "unpackUnorm2x16" "unpackUnorm4x8" "usubBorrow"
+    "nonuniformEXT"))
 
 (defvar glsl-deprecated-builtins-list
   '("noise1" "noise2" "noise3" "noise4"
