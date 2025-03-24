@@ -185,6 +185,7 @@ This style is passed directly to the "
                    "out" @font-lock-keyword-face]
                   (identifier) @font-lock-variable-name-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face))
+     (declaration (extension_storage_class ["hitAttributeEXT"] @glsl-qualifier-face))
      (declaration type: (_) declarator: (identifier) @font-lock-variable-name-face)
      (init_declarator declarator: (identifier) @font-lock-variable-name-face)
      (parameter_declaration type: (_) declarator: (identifier) @font-lock-variable-name-face)
