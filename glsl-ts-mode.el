@@ -202,6 +202,10 @@ This style is passed directly to the "
               @font-lock-builtin-face)))
 
     :language glsl
+    :feature function
+    ((call_expression function: (identifier) @font-lock-function-call-face))
+
+    :language glsl
     :feature qualifier
     (((type_qualifier) @font-lock-keyword-face))
 
