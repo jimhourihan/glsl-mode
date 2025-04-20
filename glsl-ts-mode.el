@@ -303,7 +303,9 @@ This style is passed directly to the "
 (define-derived-mode glsl-ts-mode c-ts-base-mode "GLSL"
   "Major mode for editing GLSL shaders with tree-sitter."
 
-  (when (treesit-ensure-installed 'glsl)
+  (when (if (< emacs-major-version 31)
+            (treesit-ready-p 'glsl)
+            (treesit-ensure-installed 'glsl))
     (let ((primary-parser (treesit-parser-create 'glsl)))
 
       (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
@@ -326,8 +328,9 @@ This style is passed directly to the "
 
       ;; Indentation.
       (setq-local treesit-simple-indent-rules
-                  (c-ts-mode--simple-indent-rules
-                   'c c-ts-mode-indent-style))
+                  (if (< emacs-major-version 31)
+                      (c-ts-mode--get-indent-style 'c)
+                      (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
       (setcar (car treesit-simple-indent-rules) 'glsl)
       (setq-local c-ts-common-indent-offset 'glsl-indent-offset)
 
