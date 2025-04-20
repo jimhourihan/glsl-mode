@@ -290,37 +290,6 @@ This style is passed directly to the "
   "Regular expression used to navigate to the next defun.")
 
 
-(defun glsl-ts-setup ()
-  "Setup treesitter for glsl-ts-mode."
-
-  ;; Syntax-highlighting.
-  (setq-local treesit-font-lock-settings
-              (apply #'treesit-font-lock-rules
-                     (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
-
-  ;; Indentation.
-  (setq-local treesit-simple-indent-rules
-              (treesit--indent-rules-optimize
-               (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
-
-  (setq-local c-ts-mode-indent-offset glsl-indent-offset)
-
-  ;; Navigation
-  (setq-local treesit-defun-type-regexp glsl-ts--defun-navigation-regexp)
-  (setq-local treesit-defun-skipper #'c-ts-mode--defun-skipper)
-  (setq-local treesit-defun-name-function #'c-ts-mode--defun-name)
-
-  ;; Nodes like struct/enum/union_specifier can appear in
-  ;; function_definitions, so we need to find the top-level node.
-  (setq-local treesit-defun-prefer-top-level t)
-  (setq-local treesit-defun-tactic 'top-level)
-
-  ;; IMenu.
-  (setq-local treesit-simple-imenu-settings glsl-ts--imenu-rules)
-
-  (treesit-major-mode-setup))
-
-
 (defvar-keymap glsl-ts-mode-map
   :doc "Keymap for GLSL."
   :parent prog-mode-map)
@@ -338,17 +307,6 @@ This style is passed directly to the "
       ;; Find-file.
       (setq-local ff-other-file-alist 'glsl-other-file-alist)
 
-      ;; Comment.
-      (c-ts-common-comment-setup)
-      (setq-local comment-start "/* ")
-      (setq-local comment-end " */")
-
-      ;; Electric
-      (setq-local electric-indent-chars (append "{}():;,#" electric-indent-chars))
-
-      ;; Align.
-      (add-to-list 'align-c++-modes 'glsl-ts-mode)
-
       ;; Font-lock settings.
       (setq-local font-lock-defaults nil)
       (setq-local treesit-font-lock-feature-list
@@ -357,7 +315,19 @@ This style is passed directly to the "
                     (assignment constant escape-sequence literal)
                     (bracket delimiter error function operator property variable)))
 
-      (glsl-ts-setup))))
+      ;; Syntax-highlighting.
+      (setq-local treesit-font-lock-settings
+                  (apply #'treesit-font-lock-rules
+                         (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
+
+      ;; Indentation.
+      (setq-local treesit-simple-indent-rules
+                  (c-ts-mode--simple-indent-rules
+                   'c c-ts-mode-indent-style))
+      (setcar (car treesit-simple-indent-rules) 'glsl)
+      (setq-local c-ts-common-indent-offset 'glsl-indent-offset)
+
+      (treesit-major-mode-setup))))
 
 (when (treesit-ready-p 'glsl)
   (setq major-mode-remap-defaults
