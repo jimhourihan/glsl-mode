@@ -87,7 +87,7 @@
 
 (defvar glsl-shader-variable-name-face 'glsl-shader-variable-name-face)
 (defface glsl-shader-variable-name-face
-  '((t (:inherit font-lock-preprocessor-face :slant italic)))
+  '((t (:inherit font-lock-variable-name-face :weight bold)))
   "GLSL type face."
   :group 'glsl)
 
