@@ -6,7 +6,7 @@
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
 ;; Version: 1.0
 ;; URL: https://github.com/jimhourihan/glsl-mode
-;; Package-Requires: ((emacs "29"))
+;; Package-Requires: ((emacs "29.4"))
 ;;
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -337,9 +337,12 @@ This style is passed directly to the "
       (treesit-major-mode-setup))))
 
 (when (treesit-ready-p 'glsl)
-  (setq major-mode-remap-defaults
-        (assq-delete-all 'glsl-mode major-mode-remap-defaults))
-  (add-to-list 'major-mode-remap-defaults '(glsl-mode . glsl-ts-mode)))
+  (let ((remap-alist (if (< emacs-major-version 30)
+                         'major-mode-remap-alist
+                         'major-mode-remap-defaults)))
+    (set remap-alist
+         (assq-delete-all 'glsl-mode (eval remap-alist)))
+    (add-to-list remap-alist '(glsl-mode . glsl-ts-mode))))
 
 (provide 'glsl-ts-mode)
 
