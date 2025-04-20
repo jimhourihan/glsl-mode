@@ -318,7 +318,7 @@ This style is passed directly to the "
 
 
 ;;;###autoload
-(define-derived-mode glsl-ts-mode c-ts-mode "GLSL[ts]"
+(define-derived-mode glsl-ts-mode prog-mode "GLSL[ts]"
   "Major mode for editing GLSL shaders with tree-sitter.
 
 \\{glsl-ts-mode-map}"
