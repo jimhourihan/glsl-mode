@@ -34,6 +34,14 @@
 (require 'glsl-mode)
 
 
+(defmacro glsl-ts--static-if (condition then-form &rest else-forms)
+  (declare (indent 2)
+           (debug (sexp sexp &rest sexp)))
+  (if (eval condition lexical-binding)
+      then-form
+    (cons 'progn else-forms)))
+
+
 (defcustom glsl-ts-all-shader-variables t
   "Always highlight all shader variables."
   :type 'boolean
@@ -52,18 +60,33 @@
   :safe 'booleanp
   :group 'glsl)
 
-(defcustom glsl-ts-indent-style t
-  "Style to use for indentation.
+(defun glsl-ts--indent-style-setter (sym val)
+  (set-default sym val)
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (derived-mode-p '(glsl-ts-mode))
+        (glsl-ts--apply-indent-rules val)))))
 
-This style is passed directly to the "
+(defcustom glsl-ts-indent-style nil
+  "Style used for indentation.
+See `c-ts-mode-indent-style' for possible options.
+Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
   :type '(choice (symbol :tag "Gnu" gnu)
                  (symbol :tag "K&R" k&r)
                  (symbol :tag "Linux" linux)
                  (symbol :tag "BSD" bsd)
                  (function :tag "A function for user customized style" ignore))
-  :set #'c-ts-mode--indent-style-setter
+  :set #'glsl-ts--indent-style-setter
   :safe 'c-ts-indent-style-safep
   :group 'glsl)
+
+(defun glsl-ts--apply-indent-rules (style)
+  (setq-local c-ts-mode-indent-style (or style c-ts-mode-indent-style))
+  (setq-local treesit-simple-indent-rules
+              (glsl-ts--static-if (< emacs-major-version 31)
+                                  (c-ts-mode--get-indent-style 'c)
+                                  (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
+  (setcar (car treesit-simple-indent-rules) 'glsl))
 
 ;; TODO: Add Keyword "discard" to GLSL grammar.
 (defvar glsl-ts-keywords
@@ -246,10 +269,6 @@ This style is passed directly to the "
     (["(" ")" "{" "}" "[" "]"] @font-lock-bracket-face)))
 
 
-(defvar glsl-ts-indent-rules nil
-  "Tree-sitter indentation rules for GLSL mode.")
-
-
 (defvar glsl-ts-buffer-shader-type nil
   "The current buffer shader-type.")
 
@@ -275,39 +294,9 @@ This style is passed directly to the "
     (_ nil)))
 
 
-(defvar glsl-ts--imenu-rules
-  (let ((pred #'c-ts-mode--defun-valid-p))
-    `(("Enum" "\\`enum_specifier\\'" ,pred nil)
-      ("Struct" "\\`struct_specifier\\'" ,pred nil)
-      ("Union" "\\`union_specifier\\'" ,pred nil)
-      ("Variable" ,(rx bos "declaration" eos) ,pred nil)
-      ("Function" "\\`function_definition\\'" ,pred nil)))
-  "Treesitter rules used to lookup IMenu related items.")
-
-
-(defvar glsl-ts--defun-navigation-regexp
-  (cons (regexp-opt (append '("function_definition"
-                              "type_definition"
-                              "struct_specifier"
-                              "enum_specifier"
-                              "union_specifier"
-                              "class_specifier"
-                              "namespace_definition")))
-        #'c-ts-mode--defun-valid-p)
-  "Regular expression used to navigate to the next defun.")
-
-
 (defvar-keymap glsl-ts-mode-map
   :doc "Keymap for GLSL."
   :parent prog-mode-map)
-
-
-(defmacro glsl-ts--static-if (condition then-form &rest else-forms)
-  (declare (indent 2)
-           (debug (sexp sexp &rest sexp)))
-  (if (eval condition lexical-binding)
-      then-form
-    (cons 'progn else-forms)))
 
 
 ;;;###autoload
@@ -339,13 +328,9 @@ This style is passed directly to the "
                        (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
 
     ;; Indentation.
-    (setq-local treesit-simple-indent-rules
-                (glsl-ts--static-if (< emacs-major-version 31)
-                                    (c-ts-mode--get-indent-style 'c)
-                                    (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
-    (setcar (car treesit-simple-indent-rules) 'glsl)
     (setq-local c-ts-common-indent-offset 'glsl-indent-offset)
-
+    (glsl-ts--apply-indent-rules glsl-ts-indent-style)
+    
     (treesit-major-mode-setup)))
 
 (when (treesit-ready-p 'glsl)
