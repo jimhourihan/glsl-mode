@@ -29,6 +29,11 @@
 
 ;;; Code:
 
+(defvar glsl-operator-list
+  '("=" "-" "*" "/" "+" "%" "|" "&" "^" "<<" ">>" "." "<"
+    "<=" ">=" ">" "==" "!=" "!" "&&" "||" "-=" "+=" "*=" "/="
+    "%=" "|=" "&=" "^=" ">>=" "<<=" "--" "++"))
+
 (defvar glsl-type-list
   '("float" "double" "int" "void" "bool" "mat2" "mat3"
     "mat4" "dmat2" "dmat3" "dmat4" "mat2x2" "mat2x3" "mat2x4" "dmat2x2"

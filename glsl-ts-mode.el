@@ -6,7 +6,7 @@
 ;; Keywords: languages OpenGL GPU SPIR-V Vulkan
 ;; Version: 1.0
 ;; URL: https://github.com/jimhourihan/glsl-mode
-;; Package-Requires: ((emacs "29"))
+;; Package-Requires: ((emacs "29.4"))
 ;;
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -34,6 +34,14 @@
 (require 'glsl-mode)
 
 
+(defmacro glsl-ts--static-if (condition then-form &rest else-forms)
+  (declare (indent 2)
+           (debug (sexp sexp &rest sexp)))
+  (if (eval condition lexical-binding)
+      then-form
+    (cons 'progn else-forms)))
+
+
 (defcustom glsl-ts-all-shader-variables t
   "Always highlight all shader variables."
   :type 'boolean
@@ -52,22 +60,36 @@
   :safe 'booleanp
   :group 'glsl)
 
-(defcustom glsl-ts-indent-style t
-  "Style to use for indentation.
+(defun glsl-ts--indent-style-setter (sym val)
+  (set-default sym val)
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (derived-mode-p 'glsl-ts-mode)
+        (glsl-ts--apply-indent-rules val)))))
 
-This style is passed directly to the "
+(defcustom glsl-ts-indent-style nil
+  "Style used for indentation.
+See `c-ts-mode-indent-style' for possible options.
+Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
   :type '(choice (symbol :tag "Gnu" gnu)
                  (symbol :tag "K&R" k&r)
                  (symbol :tag "Linux" linux)
                  (symbol :tag "BSD" bsd)
                  (function :tag "A function for user customized style" ignore))
-  :set #'c-ts-mode--indent-style-setter
+  :set #'glsl-ts--indent-style-setter
   :safe 'c-ts-indent-style-safep
   :group 'glsl)
 
-;; TODO: Add Keyword "discard" to GLSL grammar.
+(defun glsl-ts--apply-indent-rules (style)
+  (setq-local c-ts-mode-indent-style (or style c-ts-mode-indent-style))
+  (setq-local treesit-simple-indent-rules
+              (glsl-ts--static-if (< emacs-major-version 31)
+                                  (c-ts-mode--get-indent-style 'c)
+                                  (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
+  (setcar (car treesit-simple-indent-rules) 'glsl))
+
 (defvar glsl-ts-keywords
-  '("break" "continue" "do" "for" "while" "if" "else" ;; "discard"
+  '("break" "continue" "do" "for" "while" "if" "else"
     "subroutine" "return" "switch" "default" "case")
   "Keywords that shoud be high-lighted.")
 
@@ -174,15 +196,10 @@ This style is passed directly to the "
     ((function_declarator declarator: (_) @font-lock-function-name-face)
      (struct_specifier "struct" @font-lock-keyword-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face)
-                  ["buffer" @font-lock-keyword-face
-                   "uniform" @font-lock-keyword-face]
+                  [,@glsl-qualifier-list] @font-lock-keyword-face
                   (identifier) @font-lock-variable-name-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face)
                   (extension_storage_class) @font-lock-keyword-face
-                  (identifier) @font-lock-variable-name-face)
-     (declaration (layout_specification "layout" @glsl-qualifier-face)
-                  ["in" @font-lock-keyword-face
-                   "out" @font-lock-keyword-face]
                   (identifier) @font-lock-variable-name-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face))
      (declaration (extension_storage_class ["hitAttributeEXT"] @glsl-qualifier-face))
@@ -191,27 +208,42 @@ This style is passed directly to the "
      (parameter_declaration type: (_) declarator: (identifier) @font-lock-variable-name-face)
      (parameter_declaration (["in" "out" "inout"] @font-lock-keyword-face)
                             type: (_) declarator: (identifier) @font-lock-variable-name-face)
-     (field_declaration type: (_)
-                        declarator: [(field_identifier) @font-lock-variable-name-face
-                                     (array_declarator declarator: (field_identifier) @font-lock-variable-name-face)])
      (array_declarator declarator: (identifier) @font-lock-variable-name-face)
+     (call_expression function:
+                      ((subscript_expression argument: (identifier) @font-lock-type-face)
+                       (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face)))
      (call_expression function:
                       ((identifier) @font-lock-type-face
                        (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face))))
 
+    :language glsl
     :feature keyword
-    :language glsl
-    ([,@glsl-ts-keywords] @font-lock-keyword-face)
+    ((expression_statement (identifier) @font-lock-keyword-face
+                           (:match "discard" @font-lock-keyword-face))
+     [,@glsl-ts-keywords] @font-lock-keyword-face)
 
-    :feature builtin
     :language glsl
+    :feature builtin
     (((identifier) @font-lock-builtin-face
       (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-builtins shader-type)) eol))
               @font-lock-builtin-face)))
 
     :language glsl
+    :feature function
+    ((call_expression function: (identifier) @font-lock-function-call-face))
+
+    :language glsl
     :feature qualifier
     (((type_qualifier) @font-lock-keyword-face))
+
+    :language glsl
+    :feature operator
+    ([,@glsl-operator-list] @font-lock-operator-face
+     "!" @font-lock-negation-char-face)
+
+    :language glsl
+    :feature literal
+    ((number_literal) @font-lock-number-face)
 
     :language glsl
     :feature type
@@ -226,12 +258,16 @@ This style is passed directly to the "
       (:match ,(rx-to-string `(seq bol (or ,@(glsl-ts--shader-variables shader-type)))) @glsl-shader-variable-name-face)))
 
     :language glsl
-    :feature delimiter        ; TODO: Other brackets?
+    :feature property
+    ((field_identifier) @font-lock-property-use-face)
+
+    :language glsl
+    :feature delimiter
+    ([";" "," ":"] @font-lock-bracket-face)
+
+    :language glsl
+    :feature bracket
     (["(" ")" "{" "}" "[" "]"] @font-lock-bracket-face)))
-
-
-(defvar glsl-ts-indent-rules nil
-  "Tree-sitter indentation rules for GLSL mode.")
 
 
 (defvar glsl-ts-buffer-shader-type nil
@@ -259,98 +295,52 @@ This style is passed directly to the "
     (_ nil)))
 
 
-(defvar glsl-ts--imenu-rules
-  (let ((pred #'c-ts-mode--defun-valid-p))
-    `(("Enum" "\\`enum_specifier\\'" ,pred nil)
-      ("Struct" "\\`struct_specifier\\'" ,pred nil)
-      ("Union" "\\`union_specifier\\'" ,pred nil)
-      ("Variable" ,(rx bos "declaration" eos) ,pred nil)
-      ("Function" "\\`function_definition\\'" ,pred nil)))
-  "Treesitter rules used to lookup IMenu related items.")
-
-
-(defvar glsl-ts--defun-navigation-regexp
-  (cons (regexp-opt (append '("function_definition"
-                              "type_definition"
-                              "struct_specifier"
-                              "enum_specifier"
-                              "union_specifier"
-                              "class_specifier"
-                              "namespace_definition")))
-        #'c-ts-mode--defun-valid-p)
-  "Regular expression used to navigate to the next defun.")
-
-
-(defun glsl-ts-setup ()
-  "Setup treesitter for glsl-ts-mode."
-
-  ;; Syntax-highlighting.
-  (setq-local treesit-font-lock-settings
-              (apply #'treesit-font-lock-rules
-                     (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
-
-  ;; Indentation.
-  (setq-local treesit-simple-indent-rules
-              (treesit--indent-rules-optimize
-               (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
-
-  (setq-local c-ts-mode-indent-offset glsl-indent-offset)
-
-  ;; Navigation
-  (setq-local treesit-defun-type-regexp glsl-ts--defun-navigation-regexp)
-  (setq-local treesit-defun-skipper #'c-ts-mode--defun-skipper)
-  (setq-local treesit-defun-name-function #'c-ts-mode--defun-name)
-
-  ;; Nodes like struct/enum/union_specifier can appear in
-  ;; function_definitions, so we need to find the top-level node.
-  (setq-local treesit-defun-prefer-top-level t)
-  (setq-local treesit-defun-tactic 'top-level)
-
-  ;; IMenu.
-  (setq-local treesit-simple-imenu-settings glsl-ts--imenu-rules)
-
-  (treesit-major-mode-setup))
-
-
 (defvar-keymap glsl-ts-mode-map
   :doc "Keymap for GLSL."
   :parent prog-mode-map)
 
 
 ;;;###autoload
-(define-derived-mode glsl-ts-mode c-ts-mode "GLSL[ts]"
-  "Major mode for editing GLSL shaders with tree-sitter.
+(define-derived-mode glsl-ts-mode c-ts-base-mode "GLSL"
+  "Major mode for editing GLSL shaders with tree-sitter."
 
-\\{glsl-ts-mode-map}"
-  :syntax-table glsl-mode-syntax-table
+  (when (glsl-ts--static-if (< emacs-major-version 31)
+                            (treesit-ready-p 'glsl)
+                            (treesit-ensure-installed 'glsl))
 
-  (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
-
-  ;; Find-file.
-  (setq-local ff-other-file-alist 'glsl-other-file-alist)
-
-  ;; Comment.
-  (c-ts-common-comment-setup)
-  (setq-local comment-start "/* ")
-  (setq-local comment-end " */")
-
-  ;; Electric
-  (setq-local electric-indent-chars (append "{}():;,#" electric-indent-chars))
-
-  ;; Align.
-  (add-to-list 'align-c++-modes 'glsl-ts-mode)
-
-  ;; Font-lock settings.
-  (setq-local font-lock-defaults nil)
-  (setq-local treesit-font-lock-feature-list
-              '((comment document definition)
-                (keyword preprocessor string type qualifier builtin)
-                (assignment constant escape-sequence literal)
-                (bracket delimiter error function operator property variable)))
-
-  (when (treesit-ready-p 'glsl)
     (treesit-parser-create 'glsl)
-    (glsl-ts-setup)))
+
+    (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
+
+    ;; Find-file.
+    (setq-local ff-other-file-alist 'glsl-other-file-alist)
+
+    ;; Font-lock settings.
+    (setq-local font-lock-defaults nil)
+    (setq-local treesit-font-lock-feature-list
+                '((comment document definition)
+                  (keyword preprocessor string type qualifier builtin)
+                  (assignment constant escape-sequence literal)
+                  (bracket delimiter error function operator property variable)))
+
+    ;; Syntax-highlighting.
+    (setq-local treesit-font-lock-settings
+                (apply #'treesit-font-lock-rules
+                       (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
+
+    ;; Indentation.
+    (setq-local c-ts-common-indent-offset 'glsl-indent-offset)
+    (glsl-ts--apply-indent-rules glsl-ts-indent-style)
+    
+    (treesit-major-mode-setup)))
+
+(when (treesit-ready-p 'glsl)
+  (let ((remap-alist (glsl-ts--static-if (< emacs-major-version 30)
+                                         'major-mode-remap-alist
+                                         'major-mode-remap-defaults)))
+    (set remap-alist
+         (assq-delete-all 'glsl-mode (eval remap-alist)))
+    (add-to-list remap-alist '(glsl-mode . glsl-ts-mode))))
 
 (provide 'glsl-ts-mode)
 

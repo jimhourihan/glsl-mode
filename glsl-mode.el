@@ -202,7 +202,7 @@ the `glsl-builtins-face'."
 (defcustom glsl-browse-url-function #'browse-url
   "Function used to display GLSL man pages.
 
-E.g. the function used by calls to 'browse-url', eww, w3m, etc."
+E.g. the function used by calls to `browse-url', eww, w3m, etc."
   :type 'function
   :group 'glsl)
 
@@ -302,7 +302,9 @@ the appropriate place for that."
 
 (defvar glsl-other-file-alist
   '(("\\.frag$" (".vert"))
-    ("\\.vert$" (".frag")))
+    ("\\.vert$" (".frag"))
+    ("\\.frag.glsl$" (".vert.glsl"))
+    ("\\.vert.glsl$" (".frag.glsl")))
   "Alist of extensions to find given the current file's extension.")
 
 (defun glsl-man-completion-list ()
