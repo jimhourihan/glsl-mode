@@ -64,7 +64,7 @@
   (set-default sym val)
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
-      (when (derived-mode-p '(glsl-ts-mode))
+      (when (derived-mode-p 'glsl-ts-mode)
         (glsl-ts--apply-indent-rules val)))))
 
 (defcustom glsl-ts-indent-style nil
