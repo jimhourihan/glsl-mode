@@ -302,47 +302,56 @@ This style is passed directly to the "
   :parent prog-mode-map)
 
 
+(defmacro glsl-ts--static-if (condition then-form &rest else-forms)
+  (declare (indent 2)
+           (debug (sexp sexp &rest sexp)))
+  (if (eval condition lexical-binding)
+      then-form
+    (cons 'progn else-forms)))
+
+
 ;;;###autoload
 (define-derived-mode glsl-ts-mode c-ts-base-mode "GLSL"
   "Major mode for editing GLSL shaders with tree-sitter."
 
-  (when (if (< emacs-major-version 31)
-            (treesit-ready-p 'glsl)
-            (treesit-ensure-installed 'glsl))
-    (let ((primary-parser (treesit-parser-create 'glsl)))
+  (when (glsl-ts--static-if (< emacs-major-version 31)
+                            (treesit-ready-p 'glsl)
+                            (treesit-ensure-installed 'glsl))
 
-      (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
+    (treesit-parser-create 'glsl)
 
-      ;; Find-file.
-      (setq-local ff-other-file-alist 'glsl-other-file-alist)
+    (setq-local glsl-ts-buffer-shader-type (glsl-ts--detect-shader-type))
 
-      ;; Font-lock settings.
-      (setq-local font-lock-defaults nil)
-      (setq-local treesit-font-lock-feature-list
-                  '((comment document definition)
-                    (keyword preprocessor string type qualifier builtin)
-                    (assignment constant escape-sequence literal)
-                    (bracket delimiter error function operator property variable)))
+    ;; Find-file.
+    (setq-local ff-other-file-alist 'glsl-other-file-alist)
 
-      ;; Syntax-highlighting.
-      (setq-local treesit-font-lock-settings
-                  (apply #'treesit-font-lock-rules
-                         (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
+    ;; Font-lock settings.
+    (setq-local font-lock-defaults nil)
+    (setq-local treesit-font-lock-feature-list
+                '((comment document definition)
+                  (keyword preprocessor string type qualifier builtin)
+                  (assignment constant escape-sequence literal)
+                  (bracket delimiter error function operator property variable)))
 
-      ;; Indentation.
-      (setq-local treesit-simple-indent-rules
-                  (if (< emacs-major-version 31)
-                      (c-ts-mode--get-indent-style 'c)
-                      (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
-      (setcar (car treesit-simple-indent-rules) 'glsl)
-      (setq-local c-ts-common-indent-offset 'glsl-indent-offset)
+    ;; Syntax-highlighting.
+    (setq-local treesit-font-lock-settings
+                (apply #'treesit-font-lock-rules
+                       (glsl-ts-font-lock-rules glsl-ts-buffer-shader-type)))
 
-      (treesit-major-mode-setup))))
+    ;; Indentation.
+    (setq-local treesit-simple-indent-rules
+                (glsl-ts--static-if (< emacs-major-version 31)
+                                    (c-ts-mode--get-indent-style 'c)
+                                    (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
+    (setcar (car treesit-simple-indent-rules) 'glsl)
+    (setq-local c-ts-common-indent-offset 'glsl-indent-offset)
+
+    (treesit-major-mode-setup)))
 
 (when (treesit-ready-p 'glsl)
-  (let ((remap-alist (if (< emacs-major-version 30)
-                         'major-mode-remap-alist
-                         'major-mode-remap-defaults)))
+  (let ((remap-alist (glsl-ts--static-if (< emacs-major-version 30)
+                                         'major-mode-remap-alist
+                                         'major-mode-remap-defaults)))
     (set remap-alist
          (assq-delete-all 'glsl-mode (eval remap-alist)))
     (add-to-list remap-alist '(glsl-mode . glsl-ts-mode))))
