@@ -188,6 +188,9 @@ This style is passed directly to the "
                             type: (_) declarator: (identifier) @font-lock-variable-name-face)
      (array_declarator declarator: (identifier) @font-lock-variable-name-face)
      (call_expression function:
+                      ((subscript_expression argument: (identifier) @font-lock-type-face)
+                       (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face)))
+     (call_expression function:
                       ((identifier) @font-lock-type-face
                        (:match ,(rx-to-string `(seq bol (or ,@glsl-type-list) eol)) @font-lock-type-face))))
 
