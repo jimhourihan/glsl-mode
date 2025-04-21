@@ -202,7 +202,7 @@ the `glsl-builtins-face'."
 (defcustom glsl-browse-url-function #'browse-url
   "Function used to display GLSL man pages.
 
-E.g. the function used by calls to 'browse-url', eww, w3m, etc."
+E.g. the function used by calls to `browse-url', eww, w3m, etc."
   :type 'function
   :group 'glsl)
 
