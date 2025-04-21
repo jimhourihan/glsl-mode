@@ -88,9 +88,8 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
                                   (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
   (setcar (car treesit-simple-indent-rules) 'glsl))
 
-;; TODO: Add Keyword "discard" to GLSL grammar.
 (defvar glsl-ts-keywords
-  '("break" "continue" "do" "for" "while" "if" "else" ;; "discard"
+  '("break" "continue" "do" "for" "while" "if" "else"
     "subroutine" "return" "switch" "default" "case")
   "Keywords that shoud be high-lighted.")
 
@@ -219,7 +218,9 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
 
     :language glsl
     :feature keyword
-    ([,@glsl-ts-keywords] @font-lock-keyword-face)
+    ((expression_statement (identifier) @font-lock-keyword-face
+                           (:match "discard" @font-lock-keyword-face))
+     [,@glsl-ts-keywords] @font-lock-keyword-face)
 
     :language glsl
     :feature builtin
