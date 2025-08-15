@@ -83,9 +83,9 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
 (defun glsl-ts--apply-indent-rules (style)
   (setq-local c-ts-mode-indent-style (or style c-ts-mode-indent-style))
   (setq-local treesit-simple-indent-rules
-              (glsl-ts--static-if (< emacs-major-version 31)
-                                  (c-ts-mode--get-indent-style 'c)
-                                  (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
+              (glsl-ts--static-if (version<= emacs-version "30.1")
+                                  (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)
+                                  (c-ts-mode--get-indent-style 'c)))
   (setcar (car treesit-simple-indent-rules) 'glsl))
 
 (defvar glsl-ts-keywords
