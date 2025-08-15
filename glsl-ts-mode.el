@@ -196,6 +196,7 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
     ((function_declarator declarator: (_) @font-lock-function-name-face)
      (struct_specifier "struct" @font-lock-keyword-face)
      (declaration "uniform" @font-lock-keyword-face)
+     (declaration "shared" @font-lock-keyword-face)
      (declaration (layout_specification "layout" @glsl-qualifier-face)
                   [,@glsl-qualifier-list] @font-lock-keyword-face
                   (identifier) @font-lock-variable-name-face)
