@@ -166,22 +166,16 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
     ;; extension specifications.
     ((preproc_call (preproc_directive) @glsl-preprocessor-face
                    ((preproc_arg) @glsl-extension-face))
-     (preproc_if "#if" @glsl-preprocessor-face
-                    name: (identifier) @font-lock-constant-face)
-     (preproc_ifdef "#ifdef" @glsl-preprocessor-face
-                    name: (identifier) @font-lock-constant-face)
-     (preproc_elif "#elif" @glsl-preprocessor-face
-                    name: (identifier) @font-lock-constant-face)
-     (preproc_ifdef "#ifndef" @glsl-preprocessor-face
-                    name: (identifier) @font-lock-constant-face)
-     (preproc_else "#else" @glsl-preprocessor-face)
-     (["#endif"] @glsl-preprocessor-face)
-     (preproc_def "#define" @glsl-preprocessor-face
-                  name: (identifier) @font-lock-variable-name-face)
-     (preproc_function_def "#define" @glsl-preprocessor-face
-                           name: ((identifier) @font-lock-function-name-face))
-     (preproc_include "#include" @glsl-preprocessor-face
-                      ((string_literal) @font-lock-string-face))
+     (preproc_if (identifier) @font-lock-constant-face)
+     (preproc_if condition: (_ (identifier) @font-lock-constant-face))
+     (preproc_elif (identifier) @font-lock-constant-face)
+     (preproc_elif condition: (_ (identifier) @font-lock-constant-face))
+     (preproc_ifdef name: (identifier) @font-lock-constant-face)
+     (preproc_def name: (identifier) @font-lock-constant-face)
+     (preproc_function_def name: ((identifier) @font-lock-function-name-face))
+     (preproc_include ((string_literal) @font-lock-string-face))
+     (["#if", "#ifdef", "#ifndef", "#else", "#elif", "#endif", "#define", "#include"]
+      @glsl-preprocessor-face)
      (preproc_extension (preproc_directive) @glsl-preprocessor-face
                         extension: (identifier) @glsl-extension-face
                         ((extension_behavior) @font-lock-keyword-face
