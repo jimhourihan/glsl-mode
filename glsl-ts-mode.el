@@ -346,20 +346,9 @@ recommended to enable `electric-pair-mode' with this mode."
     (progn
       (when (treesit-ready-p 'glsl t)
         (add-to-list 'major-mode-remap-alist '(glsl-mode . glsl-ts-mode))))
-  (progn
-    (defun glsl-ts-mode-maybe ()
-      "Enable `glsl-ts-mode' when its grammar is available.
-    Also propose to install the grammar when `treesit-enabled-modes'
-    is t or contains the mode name."
-      (declare-function treesit-language-available-p "treesit.c")
-      (if (or (treesit-language-available-p 'cmake)
-              (eq treesit-enabled-modes t)
-              (memq 'glsl-ts-mode treesit-enabled-modes))
-          (glsl-ts-mode)
-        (fundamental-mode)))
-    (when (boundp 'treesit-major-mode-remap-alist)
-      (add-to-list 'treesit-major-mode-remap-alist
-               '(glsl-mode . glsl-ts-mode-maybe)))))
+    (progn
+      (when (boundp 'treesit-major-mode-remap-alist)
+        (add-to-list 'treesit-major-mode-remap-alist '(glsl-mode . glsl-ts-mode)))))
 
 (provide 'glsl-ts-mode)
 
