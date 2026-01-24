@@ -35,8 +35,7 @@
 
 (add-to-list
  'treesit-language-source-alist
- '(glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl"
-        :commit "24a6c8ef698e4480fecf8340d771fbcb5de8fbb4")
+ '(glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl")
  t)
 
 ;;;###autoload
@@ -46,7 +45,6 @@
   (if (eval condition lexical-binding)
       then-form
     (cons 'progn else-forms)))
-
 
 (defcustom glsl-ts-all-shader-variables t
   "Always highlight all shader variables."
@@ -98,7 +96,6 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
   '("break" "continue" "do" "for" "while" "if" "else"
     "subroutine" "return" "switch" "default" "case")
   "Keywords that shoud be high-lighted.")
-
 
 (defun glsl-ts--shader-constants (shader-type)
   "Create a list of special variables and constants for SHADER-TYPE."
@@ -278,10 +275,8 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
     :feature bracket
     (["(" ")" "{" "}" "[" "]"] @font-lock-bracket-face)))
 
-
 (defvar glsl-ts-buffer-shader-type nil
   "The current buffer shader-type.")
-
 
 (defun glsl-ts--detect-shader-type ()
   "Attempt to detect which GLSL shader type is active in the current buffer."
@@ -303,11 +298,9 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
     ((or "glsl") nil)
     (_ nil)))
 
-
 (defvar-keymap glsl-ts-mode-map
   :doc "Keymap for GLSL."
   :parent prog-mode-map)
-
 
 ;;;###autoload
 (define-derived-mode glsl-ts-mode c-ts-base-mode "GLSL"
@@ -349,8 +342,24 @@ recommended to enable `electric-pair-mode' with this mode."
     (treesit-major-mode-setup)))
 
 ;;;###autoload
-(when (treesit-ready-p 'glsl t)
-  (add-to-list 'major-mode-remap-alist '(glsl-mode . glsl-ts-mode)))
+(glsl-ts--static-if (< emacs-major-version 31)
+    (progn
+      (when (treesit-ready-p 'glsl t)
+        (add-to-list 'major-mode-remap-alist '(glsl-mode . glsl-ts-mode))))
+  (progn
+    (defun glsl-ts-mode-maybe ()
+      "Enable `glsl-ts-mode' when its grammar is available.
+    Also propose to install the grammar when `treesit-enabled-modes'
+    is t or contains the mode name."
+      (declare-function treesit-language-available-p "treesit.c")
+      (if (or (treesit-language-available-p 'cmake)
+              (eq treesit-enabled-modes t)
+              (memq 'glsl-ts-mode treesit-enabled-modes))
+          (glsl-ts-mode)
+        (fundamental-mode)))
+    (when (boundp 'treesit-major-mode-remap-alist)
+      (add-to-list 'treesit-major-mode-remap-alist
+               '(glsl-mode . glsl-ts-mode-maybe)))))
 
 (provide 'glsl-ts-mode)
 
