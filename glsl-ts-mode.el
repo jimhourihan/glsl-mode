@@ -33,7 +33,13 @@
 (require 'c-ts-mode)
 (require 'glsl-mode)
 
+(add-to-list
+ 'treesit-language-source-alist
+ '(glsl "https://github.com/tree-sitter-grammars/tree-sitter-glsl"
+        :commit "24a6c8ef698e4480fecf8340d771fbcb5de8fbb4")
+ t)
 
+;;;###autoload
 (defmacro glsl-ts--static-if (condition then-form &rest else-forms)
   (declare (indent 2)
            (debug (sexp sexp &rest sexp)))
@@ -305,10 +311,15 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
 
 ;;;###autoload
 (define-derived-mode glsl-ts-mode c-ts-base-mode "GLSL"
-  "Major mode for editing GLSL shaders with tree-sitter."
+  "Major mode for editing GLSL, powered by tree-sitter.
+
+Since this mode uses a parser, unbalanced brackets might cause
+some breakage in indentation/fontification.  Therefore, it's
+recommended to enable `electric-pair-mode' with this mode."
+  :group 'glsl
 
   (when (glsl-ts--static-if (< emacs-major-version 31)
-                            (treesit-ready-p 'glsl)
+                            (treesit-ready-p 'glsl t)
                             (treesit-ensure-installed 'glsl))
 
     (treesit-parser-create 'glsl)
@@ -337,13 +348,9 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
     
     (treesit-major-mode-setup)))
 
-(when (treesit-ready-p 'glsl)
-  (let ((remap-alist (glsl-ts--static-if (< emacs-major-version 30)
-                                         'major-mode-remap-alist
-                                         'major-mode-remap-defaults)))
-    (set remap-alist
-         (assq-delete-all 'glsl-mode (eval remap-alist)))
-    (add-to-list remap-alist '(glsl-mode . glsl-ts-mode))))
+;;;###autoload
+(when (treesit-ready-p 'glsl t)
+  (add-to-list 'major-mode-remap-alist '(glsl-mode . glsl-ts-mode)))
 
 (provide 'glsl-ts-mode)
 
