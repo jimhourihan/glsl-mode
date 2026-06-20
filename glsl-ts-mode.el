@@ -291,8 +291,10 @@ This style is passed directly to the "
 
   ;; Indentation.
   (setq-local treesit-simple-indent-rules
-              (treesit--indent-rules-optimize
-               (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)))
+            (treesit--indent-rules-optimize
+             (if (fboundp 'c-ts-mode--simple-indent-rules)
+                 (c-ts-mode--simple-indent-rules 'c c-ts-mode-indent-style)
+               (c-ts-mode--get-indent-style 'c))))
 
   (setq-local c-ts-mode-indent-offset glsl-indent-offset)
 
