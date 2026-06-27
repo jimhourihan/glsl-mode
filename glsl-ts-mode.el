@@ -224,7 +224,8 @@ Alternatively, set it to `nil' to inherit from `c-ts-mode-indent-style'."
 
     :language glsl
     :feature keyword
-    ((expression_statement (identifier) @font-lock-keyword-face
+    ((conditional_expression (["?" ":"]) @font-lock-keyword-face)
+     (expression_statement (identifier) @font-lock-keyword-face
                            (:match "discard" @font-lock-keyword-face))
      [,@glsl-ts-keywords] @font-lock-keyword-face)
 
