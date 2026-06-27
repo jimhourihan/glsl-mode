@@ -359,6 +359,7 @@ the appropriate place for that."
 		     (c-update-modeline))
   (c-initialize-cc-mode t)
   (c-init-language-vars glsl-mode)
+  (setq-local parse-sexp-lookup-properties t)
   (c-common-init 'glsl-mode)
   (cc-imenu-init cc-imenu-c++-generic-expression)
 
